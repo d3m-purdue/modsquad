@@ -1,5 +1,6 @@
 var path = require('path');
 
+var webpack = require('webpack');
 var HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -58,6 +59,10 @@ module.exports = {
       chunks: [
         'index'
       ]
+    }),
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery'
     })
   ]
 };

@@ -1,10 +1,24 @@
+import 'bootstrap/dist/js/bootstrap';
+import { select } from 'd3-selection';
+
 import { action,
          store,
          observeStore } from './redux';
-import html from './index.jade';
+import body from './index.jade';
 import './index.less';
 
-document.body.innerHTML = html();
+select(document.body).html(body());
+
+observeStore(next => {
+  const index = next.getIn(['data', 'which']);
+  const sel = select('#navbar a.dropdown-toggle');
+  if (index === -1) {
+    sel.html('Select dataset <span class="caret"></span>');
+  } else {
+    const dataset = s.getIn(['data', 'datasets']).get(index);
+    sel.html(dataset.get('name'));
+  }
+}, s => s.getIn(['dataset', 'which']));
 
 observeStore(next => {
   const mode = next.get('mode');

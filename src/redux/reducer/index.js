@@ -3,7 +3,10 @@ import Immutable from 'immutable';
 import { actionType } from '../action';
 
 const initial = Immutable.fromJS({
-  mode: 0
+  data: {
+    which: -1,
+    datasets: []
+  }
 });
 
 const reducer = (state = initial, action = {}) => {
