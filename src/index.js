@@ -1,8 +1,10 @@
 import { action,
          store,
          observeStore } from './redux';
+import html from './index.jade';
+import './index.less';
 
-console.log('reduxstrap!');
+document.body.innerHTML = html();
 
 observeStore(next => {
   const mode = next.get('mode');

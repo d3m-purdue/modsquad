@@ -25,6 +25,23 @@ module.exports = {
         ]
       },
       {
+        test: /\.jade$/,
+        use: 'jade-loader'
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'less-loader'
+        ]
+      },
+      {
+        test: /\.(eot|woff2|woff|ttf|svg)$/,
+        use: 'url-loader',
+        include: /node_modules\/bootstrap/
+      },
+      {
         test: /\.yml$/,
         exclude: /node_modules/,
         use: [
