@@ -1,0 +1,19 @@
+{
+  "name": "d3m-ta3-modeling",
+  "version": "0.1.0",
+  "description": "A prototype TA3 application enabling a hypothetical modeling task",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d3m-purdue/d3m-ta3-modeling.git"
+  },
+  "author": "Roni Choudhury",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/d3m-purdue/d3m-ta3-modeling/issues"
+  },
+  "homepage": "https://github.com/d3m-purdue/d3m-ta3-modeling#readme"
+}
