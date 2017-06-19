@@ -1,0 +1,35 @@
+{
+  "name": "d3m-ta3-modeling",
+  "version": "0.1.0",
+  "description": "A prototype TA3 application enabling a hypothetical modeling task",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "serve": "http-server build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d3m-purdue/d3m-ta3-modeling.git"
+  },
+  "author": "Roni Choudhury",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/d3m-purdue/d3m-ta3-modeling/issues"
+  },
+  "homepage": "https://github.com/d3m-purdue/d3m-ta3-modeling#readme",
+  "devDependencies": {
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.0.0",
+    "babel-preset-es2015": "^6.24.1",
+    "html-webpack-plugin": "^2.28.0",
+    "http-server": "^0.10.0",
+    "immutable": "^3.8.1",
+    "redux": "^3.7.0",
+    "redux-logger": "^3.0.6",
+    "redux-promise": "^0.5.3",
+    "redux-thunk": "^2.2.0",
+    "webpack": "^3.0.0",
+    "yaml-loader": "^0.4.0"
+  }
+}
