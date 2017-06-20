@@ -4,6 +4,7 @@
   "description": "A prototype TA3 application enabling a hypothetical modeling task",
   "main": "index.js",
   "scripts": {
+    "data": "sh script/genData.sh",
     "build": "webpack",
     "lint": "semistandard",
     "serve": "http-server build",
