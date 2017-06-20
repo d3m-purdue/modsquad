@@ -17,12 +17,12 @@ const reducer = (state = initial, action = {}) => {
   }
 
   switch (action.type) {
-    case actionType.initial:
-      newState = state.set('mode', 1);
+    case actionType.setDatasetList:
+      newState = state.setIn(['data', 'datasets'], Immutable.fromJS(action.datasets));
       break;
 
-    case actionType.secondary:
-      newState = state.set('mode', 2);
+    case actionType.setActiveDataset:
+      newState = state.setIn(['data', 'which'], action.index);
       break;
   }
 

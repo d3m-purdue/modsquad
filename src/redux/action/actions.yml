@@ -1,4 +1,5 @@
-initial:
-  - label
+setDatasetList:
+  - datasets
 
-secondary: []
+setActiveDataset:
+  - index
