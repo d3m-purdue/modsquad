@@ -1,5 +1,6 @@
 var path = require('path');
 
+var webpack = require('webpack');
 var HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -25,6 +26,28 @@ module.exports = {
         ]
       },
       {
+        test: /\.jade$/,
+        use: 'jade-loader'
+      },
+      {
+        test: /\.less$/,
+        use: [
+          'style-loader',
+          'css-loader',
+          'less-loader'
+        ]
+      },
+      {
+        test: /\.(eot|woff2|woff|ttf|svg)$/,
+        use: 'url-loader',
+        include: /node_modules\/bootstrap/
+      },
+      {
+        test: /\.csv$/,
+        use: 'raw-loader',
+        exclude: /node_modules/
+      },
+      {
         test: /\.yml$/,
         exclude: /node_modules/,
         use: [
@@ -41,6 +64,10 @@ module.exports = {
       chunks: [
         'index'
       ]
+    }),
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery'
     })
   ]
 };
