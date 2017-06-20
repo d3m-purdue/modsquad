@@ -43,6 +43,11 @@ module.exports = {
         include: /node_modules\/bootstrap/
       },
       {
+        test: /\.csv$/,
+        use: 'raw-loader',
+        exclude: /node_modules/
+      },
+      {
         test: /\.yml$/,
         exclude: /node_modules/,
         use: [

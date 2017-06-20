@@ -1,5 +1,6 @@
 import 'bootstrap/dist/js/bootstrap';
 import { select } from 'd3-selection';
+import dl from 'datalib';
 
 import { action,
          store,
@@ -7,6 +8,9 @@ import { action,
 import data from '../data/index.yml';
 import body from './index.jade';
 import './index.less';
+
+// Construct a require context for the available data files.
+const dataReq = require.context('../data/csv', false, /\.csv$/);
 
 // Install the content template.
 select(document.body).html(body());
@@ -44,5 +48,12 @@ observeStore(next => {
     .html(d => d.name)
     .on('click', (d, i) => {
       store.dispatch(action.setActiveDataset(i));
+
+      const dataRaw = dataReq(`./${d.key || d.name}.csv`);
+      const data = dl.read(dataRaw, {
+        type: 'csv',
+        parse: 'auto'
+      });
+      store.dispatch(action.setActiveData(data));
     });
 }, s => s.getIn(['data', 'datasets']));

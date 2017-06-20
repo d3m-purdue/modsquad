@@ -3,3 +3,6 @@ setDatasetList:
 
 setActiveDataset:
   - index
+
+setActiveData:
+  - data
