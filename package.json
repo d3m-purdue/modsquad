@@ -6,6 +6,7 @@
   "scripts": {
     "data": "sh script/genData.sh",
     "build": "webpack",
+    "watch": "webpack -w",
     "lint": "semistandard",
     "serve": "http-server build",
     "test": "echo \"Error: no test specified\" && exit 1"
