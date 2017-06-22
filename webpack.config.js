@@ -1,9 +1,10 @@
 var path = require('path');
 
 var webpack = require('webpack');
+var candelaLoaders = require('candela/webpack');
 var HtmlPlugin = require('html-webpack-plugin');
 
-module.exports = {
+module.exports = candelaLoaders({
   entry: {
     index: './src/index.js'
   },
@@ -70,4 +71,4 @@ module.exports = {
       jQuery: 'jquery'
     })
   ]
-};
+});
