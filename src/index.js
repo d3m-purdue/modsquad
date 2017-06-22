@@ -6,6 +6,7 @@ import { action,
          store,
          observeStore } from './redux';
 import stringToElement from './util/stringToElement';
+import { NormalPlot } from './util/stats';
 import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
@@ -55,7 +56,23 @@ observeStore(next => {
     .enter()
     .append(d => stringToElement(varTemplate({
       name: d
-    })));
+    })))
+    .select('.panel-body')
+    .append('div')
+    .classed('vis', true)
+    .each(function (d) {
+      if (d === 'A') {
+        // Collect all the 'A' values from the data.
+        const vals = data.map(d => d.A);
+
+        const vis = new NormalPlot(this, {
+          data: vals,
+          width: 300,
+          height: 200
+        });
+      }
+    });
+
 }, s => s.getIn(['data', 'data']));
 
 // When the list of datasets changes, populate the dropdown menu.

@@ -36,6 +36,7 @@
     "immutable": "^3.8.1",
     "jade": "^1.11.0",
     "jade-loader": "^0.8.0",
+    "javascript-detect-element-resize": "^0.5.3",
     "jquery": "^3.2.1",
     "less": "^2.7.2",
     "less-loader": "^4.0.4",
@@ -45,8 +46,11 @@
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
     "semistandard": "^11.0.0",
+    "strip-json-comments-loader": "0.0.2",
     "style-loader": "^0.18.2",
+    "telegraph-events": "^1.0.3",
     "url-loader": "^0.5.9",
+    "vega": "^2.4.2",
     "webpack": "^3.0.0",
     "yaml-loader": "^0.4.0"
   }
