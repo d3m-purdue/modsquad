@@ -61,16 +61,16 @@ observeStore(next => {
     .append('div')
     .classed('vis', true)
     .each(function (d) {
-      if (d === 'A') {
-        // Collect all the 'A' values from the data.
-        const vals = data.map(d => d.A);
+        // Collect the column of data corresponding to `d`.
+        const vals = data.map(data => data[d]);
 
         const vis = new NormalPlot(this, {
           data: vals,
+          opacity: 0.9,
+          size: 'size',
           width: 300,
           height: 200
         });
-      }
     });
 
 }, s => s.getIn(['data', 'data']));

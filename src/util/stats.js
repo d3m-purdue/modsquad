@@ -27,7 +27,8 @@ const xformData = (opts) => {
   data.forEach((d, i) => {
     newData.push({
       value: d,
-      order: order[i]
+      order: order[i],
+      size: 2
     });
   });
 
@@ -42,7 +43,6 @@ const xformData = (opts) => {
 class NormalPlot extends candela.mixins.InitSize(ScatterPlot) {
   constructor (el, options) {
     super(el, xformData(options));
-    console.log('hi');
   }
 };
 
