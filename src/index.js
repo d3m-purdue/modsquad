@@ -134,4 +134,21 @@ observeStore(next => {
 
       select(this).attr('disabled', disabled ? true : null);
     });
+
+  const logPanels = select('#logvars .panel')
+    .selectAll('.panel-heading')
+    .data(logVars)
+    .enter()
+    .append(d => stringToElement(varTemplate({
+      name: d.name
+    })))
+    .each(function (d) {
+      const vis = new NormalPlot(this, {
+        data: d.data,
+        opacity: 0.9,
+        size: 'size',
+        width: 300,
+        height: 200
+      });
+    });
 }, s => s.get('logVars'));
