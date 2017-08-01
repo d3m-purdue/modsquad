@@ -76,7 +76,12 @@ observeStore(next => {
 
   panels.select('.log')
     .on('click', d => {
-      console.log(d);
+      const data = next.getIn(['data', 'data'])
+        .toJS()
+        .map(x => Math.log(x[d]))
+        .filter(x => isFinite(x));
+
+      store.dispatch(action.createLogVariable(d, data));
     });
 
 }, s => s.getIn(['data', 'data']));
@@ -107,3 +112,26 @@ observeStore(next => {
       store.dispatch(action.setActiveData(data));
     });
 }, s => s.getIn(['data', 'datasets']));
+
+// When the list of derived log transform variables changes, update the
+// clickable state of the log transform buttons, and the list of log-variable
+// panels.
+observeStore(next => {
+  const logVars = next.get('logVars').toJS();
+
+  // Disable "compute log transform" buttons for variables that have already
+  // been log-transformed.
+  const panels = select('#vars .panel')
+    .selectAll('.log')
+    .each(function (d) {
+      const logName = `log-${d}`;
+      let disabled = false;
+      logVars.forEach(logvar => {
+        if (logvar.name === logName) {
+          disabled = true;
+        }
+      });
+
+      select(this).attr('disabled', disabled ? true : null);
+    });
+}, s => s.get('logVars'));
