@@ -51,13 +51,14 @@ observeStore(next => {
   const data = immData.toJS();
   const vars = Object.keys(data[0]);
 
-  panel.selectAll('.panel-heading')
+  const panels = panel.selectAll('.panel-heading')
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
       name: d
-    })))
-    .select('.panel-body')
+    })));
+
+  panels.select('.panel-body')
     .append('div')
     .classed('vis', true)
     .each(function (d) {
@@ -71,6 +72,11 @@ observeStore(next => {
           width: 300,
           height: 200
         });
+    });
+
+  panels.select('.log')
+    .on('click', d => {
+      console.log(d);
     });
 
 }, s => s.getIn(['data', 'data']));
