@@ -1,6 +1,6 @@
 import candela from 'candela';
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
-import 'candela/dist/mixin';
+import InitSize from 'candela/plugins/mixin/InitSize';
 
 const sq = (x) => x * x;
 
@@ -40,7 +40,7 @@ const xformData = (opts) => {
   });
 };
 
-class NormalPlot extends candela.mixins.InitSize(ScatterPlot) {
+class NormalPlot extends InitSize(ScatterPlot) {
   constructor (el, options) {
     super(el, xformData(options));
   }
