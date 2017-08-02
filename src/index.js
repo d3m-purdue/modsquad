@@ -51,13 +51,14 @@ observeStore(next => {
   const data = immData.toJS();
   const vars = Object.keys(data[0]);
 
-  panel.selectAll('.panel-heading')
+  const panels = panel.selectAll('.panel-heading')
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
       name: d
-    })))
-    .select('.panel-body')
+    })));
+
+  panels.select('.panel-body')
     .append('div')
     .classed('vis', true)
     .each(function (d) {
@@ -71,6 +72,16 @@ observeStore(next => {
           width: 300,
           height: 200
         });
+    });
+
+  panels.select('.log')
+    .on('click', d => {
+      const data = next.getIn(['data', 'data'])
+        .toJS()
+        .map(x => Math.log(x[d]))
+        .filter(x => isFinite(x));
+
+      store.dispatch(action.createLogVariable(d, data));
     });
 
 }, s => s.getIn(['data', 'data']));
@@ -101,3 +112,43 @@ observeStore(next => {
       store.dispatch(action.setActiveData(data));
     });
 }, s => s.getIn(['data', 'datasets']));
+
+// When the list of derived log transform variables changes, update the
+// clickable state of the log transform buttons, and the list of log-variable
+// panels.
+observeStore(next => {
+  const logVars = next.get('logVars').toJS();
+
+  // Disable "compute log transform" buttons for variables that have already
+  // been log-transformed.
+  const panels = select('#vars .panel')
+    .selectAll('.log')
+    .each(function (d) {
+      const logName = `log-${d}`;
+      let disabled = false;
+      logVars.forEach(logvar => {
+        if (logvar.name === logName) {
+          disabled = true;
+        }
+      });
+
+      select(this).attr('disabled', disabled ? true : null);
+    });
+
+  const logPanels = select('#logvars .panel')
+    .selectAll('.panel-heading')
+    .data(logVars)
+    .enter()
+    .append(d => stringToElement(varTemplate({
+      name: d.name
+    })))
+    .each(function (d) {
+      const vis = new NormalPlot(this, {
+        data: d.data,
+        opacity: 0.9,
+        size: 'size',
+        width: 300,
+        height: 200
+      });
+    });
+}, s => s.get('logVars'));

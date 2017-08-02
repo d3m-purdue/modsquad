@@ -7,7 +7,8 @@ const initial = Immutable.fromJS({
     which: -1,
     datasets: [],
     data: null
-  }
+  },
+  logVars: []
 });
 
 const reducer = (state = initial, action = {}) => {
@@ -28,6 +29,13 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.setActiveData:
       newState = state.setIn(['data', 'data'], Immutable.fromJS(action.data));
+      break;
+
+    case actionType.createLogVariable:
+      newState = state.update('logVars', vars => vars.push(Immutable.fromJS({
+        name: `log-${action.name}`,
+        data: action.data
+      })));
       break;
   }
 
