@@ -55,12 +55,12 @@ observeStore(next => {
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d
+      name: d,
+      button: true
     })));
 
   panels.select('.panel-body')
-    .append('div')
-    .classed('vis', true)
+    .select('.vis')
     .each(function (d) {
       // Collect the column of data corresponding to `d`.
       const vals = data.map(data => data[d]);
@@ -139,8 +139,11 @@ observeStore(next => {
     .data(logVars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d.name
+      name: d.name,
+      button: false
     })))
+    .select('.panel-body')
+    .select('.vis')
     .each(function (d) {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
