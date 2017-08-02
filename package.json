@@ -7,7 +7,7 @@
     "data": "sh script/genData.sh",
     "build": "webpack",
     "watch": "webpack -w",
-    "lint": "semistandard",
+    "lint": "semistandard | snazzy",
     "serve": "http-server build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -46,6 +46,7 @@
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
     "semistandard": "^11.0.0",
+    "snazzy": "^7.0.0",
     "strip-json-comments-loader": "0.0.2",
     "style-loader": "^0.18.2",
     "telegraph-events": "^1.0.3",
