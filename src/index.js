@@ -55,7 +55,8 @@ observeStore(next => {
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d
+      name: d,
+      button: true
     })));
 
   panels.select('.panel-body')
@@ -138,7 +139,8 @@ observeStore(next => {
     .data(logVars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d.name
+      name: d.name,
+      button: false
     })))
     .select('.panel-body')
     .select('.vis')
