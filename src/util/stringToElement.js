@@ -5,4 +5,4 @@ export default function stringToElement (s) {
   const t = document.createElement('template');
   t.innerHTML = s;
   return t.content.firstChild;
-};
+}
