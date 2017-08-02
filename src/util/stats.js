@@ -1,4 +1,3 @@
-import candela from 'candela';
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
 import InitSize from 'candela/plugins/mixin/InitSize';
 
@@ -44,7 +43,7 @@ class NormalPlot extends InitSize(ScatterPlot) {
   constructor (el, options) {
     super(el, xformData(options));
   }
-};
+}
 
 export {
   inverf,

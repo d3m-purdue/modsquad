@@ -62,16 +62,16 @@ observeStore(next => {
     .append('div')
     .classed('vis', true)
     .each(function (d) {
-        // Collect the column of data corresponding to `d`.
-        const vals = data.map(data => data[d]);
+      // Collect the column of data corresponding to `d`.
+      const vals = data.map(data => data[d]);
 
-        const vis = new NormalPlot(this, {
-          data: vals,
-          opacity: 0.9,
-          size: 'size',
-          width: 300,
-          height: 200
-        });
+      const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+        data: vals,
+        opacity: 0.9,
+        size: 'size',
+        width: 300,
+        height: 200
+      });
     });
 
   panels.select('.log')
@@ -83,7 +83,6 @@ observeStore(next => {
 
       store.dispatch(action.createLogVariable(d, data));
     });
-
 }, s => s.getIn(['data', 'data']));
 
 // When the list of datasets changes, populate the dropdown menu.
@@ -121,7 +120,7 @@ observeStore(next => {
 
   // Disable "compute log transform" buttons for variables that have already
   // been log-transformed.
-  const panels = select('#vars .panel')
+  select('#vars .panel')
     .selectAll('.log')
     .each(function (d) {
       const logName = `log-${d}`;
@@ -135,7 +134,7 @@ observeStore(next => {
       select(this).attr('disabled', disabled ? true : null);
     });
 
-  const logPanels = select('#logvars .panel')
+  select('#logvars .panel')
     .selectAll('.panel-heading')
     .data(logVars)
     .enter()
@@ -143,7 +142,7 @@ observeStore(next => {
       name: d.name
     })))
     .each(function (d) {
-      const vis = new NormalPlot(this, {
+      const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
         size: 'size',
