@@ -59,8 +59,7 @@ observeStore(next => {
     })));
 
   panels.select('.panel-body')
-    .append('div')
-    .classed('vis', true)
+    .select('.vis')
     .each(function (d) {
       // Collect the column of data corresponding to `d`.
       const vals = data.map(data => data[d]);
@@ -141,6 +140,8 @@ observeStore(next => {
     .append(d => stringToElement(varTemplate({
       name: d.name
     })))
+    .select('.panel-body')
+    .select('.vis')
     .each(function (d) {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
