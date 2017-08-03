@@ -49,24 +49,37 @@ observeStore(next => {
 
   // Extract the list of variable names.
   const data = immData.toJS();
-  const vars = Object.keys(data[0]);
+  const names = Object.keys(data[0]);
 
-  const panels = panel.selectAll('.panel-heading')
+  // Gather up a list of new variables to create.
+  const vars = names.map(name => ({
+    name,
+    data: data.map(datum => datum[name])
+  }));
+
+  // Set these variables as the application's "original variables".
+  //
+  // NOTE: if this is not done in a timeout callback, it results in a weird
+  // infinite loop for some reason.
+  window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
+}, s => s.getIn(['data', 'data']));
+
+observeStore(next => {
+  const vars = next.get('vars').toJS();
+  const panels = select('#vars .panel')
+    .selectAll('.panel-heading')
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d,
+      name: d.name,
       button: true
     })));
 
   panels.select('.panel-body')
     .select('.vis')
     .each(function (d) {
-      // Collect the column of data corresponding to `d`.
-      const vals = data.map(data => data[d]);
-
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
-        data: vals,
+        data: d.data,
         opacity: 0.9,
         size: 'size',
         width: 300,
@@ -76,14 +89,12 @@ observeStore(next => {
 
   panels.select('.log')
     .on('click', d => {
-      const data = next.getIn(['data', 'data'])
-        .toJS()
-        .map(x => Math.log(x[d]))
+      const data = d.data.map(x => Math.log(x))
         .filter(x => isFinite(x));
 
-      store.dispatch(action.createLogVariable(d, data));
+      store.dispatch(action.createLogVariable(d.name, data));
     });
-}, s => s.getIn(['data', 'data']));
+}, s => s.get('vars'));
 
 // When the list of datasets changes, populate the dropdown menu.
 observeStore(next => {
@@ -123,7 +134,7 @@ observeStore(next => {
   select('#vars .panel')
     .selectAll('.log')
     .each(function (d) {
-      const logName = `log-${d}`;
+      const logName = `log-${d.name}`;
       let disabled = false;
       logVars.forEach(logvar => {
         if (logvar.name === logName) {

@@ -7,6 +7,9 @@ setActiveDataset:
 setActiveData:
   - data
 
+setVariables:
+  - variables
+
 createLogVariable:
   - name
   - data
