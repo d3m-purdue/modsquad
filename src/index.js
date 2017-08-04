@@ -1,4 +1,5 @@
 import 'bootstrap/dist/js/bootstrap';
+import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
 import { select,
          selectAll } from 'd3-selection';
 import dl from 'datalib';
@@ -232,4 +233,21 @@ observeStore(next => {
   };
   setName('button.var1', 'Dependent Variable', depVar);
   setName('button.var2', 'Response Variable', respVar);
+
+  // If both variables are selected, display a scatterplot of them.
+  if (depVar && respVar) {
+    const data = depVar.data.map((d, i) => ({
+      x: d,
+      y: respVar.data[i]
+    }));
+
+    const el = select('#linmodel .vis').node();
+
+    const vis = new ScatterPlot(el, { // eslint-disable-line no-unused-vars
+      data,
+      opacity: 0.9,
+      width: 600,
+      height: 600
+    });
+  }
 }, s => s.get('linearModel'));
