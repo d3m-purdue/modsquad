@@ -212,6 +212,9 @@ observeStore(next => {
 
 // When the linear modeling variables change, update the menus.
 observeStore(next => {
+  const linearModel = next.get('linearModel');
+
+  // Collect the variable data.
   const get = key => {
     let x = linearModel.get(key);
     if (x !== null) {
@@ -219,16 +222,14 @@ observeStore(next => {
     }
     return x;
   };
+  const depVar = get('depVar');
+  const respVar = get('respVar');
 
+  // Set the text on the dropdown menus.
   const setName = (which, label, v) => {
     select(which)
       .text(v ? `${label}: ${v.name}` : label);
   };
-
-  const linearModel = next.get('linearModel');
-  const depVar = get('depVar');
-  const respVar = get('respVar');
-
   setName('button.var1', 'Dependent Variable', depVar);
   setName('button.var2', 'Response Variable', respVar);
 }, s => s.get('linearModel'));
