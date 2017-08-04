@@ -67,6 +67,14 @@ observeStore(next => {
 
 observeStore(next => {
   const vars = next.get('vars').toJS();
+
+  select('.original-variables')
+    .classed('hidden', vars.length === 0);
+
+  const logVars = next.get('logVars').toJS();
+  select('.linear-modeling')
+    .classed('hidden', vars.length + logVars.length === 0);
+
   const panels = select('#vars .panel')
     .selectAll('.panel-heading')
     .data(vars)
@@ -129,6 +137,13 @@ observeStore(next => {
 // panels.
 observeStore(next => {
   const logVars = next.get('logVars').toJS();
+
+  select('.derived-variables')
+    .classed('hidden', logVars.length === 0);
+
+  const vars = next.get('vars').toJS();
+  select('.linear-modeling')
+    .classed('hidden', vars.length + logVars.length === 0);
 
   // Disable "compute log transform" buttons for variables that have already
   // been log-transformed.
