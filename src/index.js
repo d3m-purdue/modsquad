@@ -1,5 +1,6 @@
 import 'bootstrap/dist/js/bootstrap';
-import { select } from 'd3-selection';
+import { select,
+         selectAll } from 'd3-selection';
 import dl from 'datalib';
 
 import { action,
@@ -7,7 +8,6 @@ import { action,
          observeStore } from './redux';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
-import { allVars } from './util';
 import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
@@ -65,15 +65,41 @@ observeStore(next => {
   window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
 }, s => s.getIn(['data', 'data']));
 
+const varsChanged = (vars, logVars) => {
+  const allVars = [].concat(vars, logVars);
+
+  const fillMenu = (sel, which) => {
+    const menu = sel.selectAll('li')
+      .data(allVars);
+
+    menu.enter()
+      .append('li')
+      .append('a')
+      .attr('href', '#')
+      .text(d => d.name)
+      .on('click', d => {
+        store.dispatch(action.setLinearModelVar(which, d));
+      });
+
+    menu.exit()
+      .remove();
+  };
+
+  fillMenu(select('.variable1'), 0);
+  fillMenu(select('.variable2'), 1);
+};
+
 observeStore(next => {
   const vars = next.get('vars').toJS();
 
-  select('.original-variables')
+  selectAll('.original-variables')
     .classed('hidden', vars.length === 0);
 
   const logVars = next.get('logVars').toJS();
-  select('.linear-modeling')
+  selectAll('.linear-modeling')
     .classed('hidden', vars.length + logVars.length === 0);
+
+  varsChanged(vars, logVars);
 
   const panels = select('#vars .panel')
     .selectAll('.panel-heading')
@@ -138,12 +164,14 @@ observeStore(next => {
 observeStore(next => {
   const logVars = next.get('logVars').toJS();
 
-  select('.derived-variables')
+  selectAll('.derived-variables')
     .classed('hidden', logVars.length === 0);
 
   const vars = next.get('vars').toJS();
-  select('.linear-modeling')
+  selectAll('.linear-modeling')
     .classed('hidden', vars.length + logVars.length === 0);
+
+  varsChanged(vars, logVars);
 
   // Disable "compute log transform" buttons for variables that have already
   // been log-transformed.

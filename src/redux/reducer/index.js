@@ -9,7 +9,11 @@ const initial = Immutable.fromJS({
     data: null
   },
   vars: [],
-  logVars: []
+  logVars: [],
+  linearModel: {
+    depVar: null,
+    respVar: null
+  }
 });
 
 const reducer = (state = initial, action = {}) => {
@@ -41,6 +45,16 @@ const reducer = (state = initial, action = {}) => {
         name: `log-${action.name}`,
         data: action.data
       })));
+      break;
+
+    case actionType.setLinearModelVar:
+      if (action.which === 0) {
+        newState = state.setIn(['linearModel', 'depVar'], Immutable.fromJS(action.var));
+      } else if (action.which === 1) {
+        newState = state.setIn(['linearModel', 'respVar'], Immutable.fromJS(action.var));
+      } else {
+        throw new Error(`illegal action.which: ${action.which}`);
+      }
       break;
   }
 

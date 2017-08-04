@@ -13,3 +13,7 @@ setVariables:
 createLogVariable:
   - name
   - data
+
+setLinearModelVar:
+  - which
+  - var
