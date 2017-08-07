@@ -7,6 +7,13 @@ setActiveDataset:
 setActiveData:
   - data
 
+setVariables:
+  - variables
+
 createLogVariable:
   - name
   - data
+
+setLinearModelVar:
+  - which
+  - var

@@ -1,5 +1,7 @@
 import 'bootstrap/dist/js/bootstrap';
-import { select } from 'd3-selection';
+import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
+import { select,
+         selectAll } from 'd3-selection';
 import dl from 'datalib';
 
 import { action,
@@ -49,24 +51,71 @@ observeStore(next => {
 
   // Extract the list of variable names.
   const data = immData.toJS();
-  const vars = Object.keys(data[0]);
+  const names = Object.keys(data[0]);
 
-  const panels = panel.selectAll('.panel-heading')
+  // Gather up a list of new variables to create.
+  const vars = names.map(name => ({
+    name,
+    data: data.map(datum => datum[name])
+  }));
+
+  // Set these variables as the application's "original variables".
+  //
+  // NOTE: if this is not done in a timeout callback, it results in a weird
+  // infinite loop for some reason.
+  window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
+}, s => s.getIn(['data', 'data']));
+
+const varsChanged = (vars, logVars) => {
+  const allVars = [].concat(vars, logVars);
+
+  const fillMenu = (sel, which) => {
+    const menu = sel.selectAll('li')
+      .data(allVars);
+
+    menu.enter()
+      .append('li')
+      .append('a')
+      .attr('href', '#')
+      .text(d => d.name)
+      .on('click', d => {
+        store.dispatch(action.setLinearModelVar(which, d));
+      });
+
+    menu.exit()
+      .remove();
+  };
+
+  fillMenu(select('.variable1'), 0);
+  fillMenu(select('.variable2'), 1);
+};
+
+observeStore(next => {
+  const vars = next.get('vars').toJS();
+
+  selectAll('.original-variables')
+    .classed('hidden', vars.length === 0);
+
+  const logVars = next.get('logVars').toJS();
+  selectAll('.linear-modeling')
+    .classed('hidden', vars.length + logVars.length === 0);
+
+  varsChanged(vars, logVars);
+
+  const panels = select('#vars .panel')
+    .selectAll('.panel-heading')
     .data(vars)
     .enter()
     .append(d => stringToElement(varTemplate({
-      name: d,
+      name: d.name,
       button: true
     })));
 
   panels.select('.panel-body')
     .select('.vis')
     .each(function (d) {
-      // Collect the column of data corresponding to `d`.
-      const vals = data.map(data => data[d]);
-
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
-        data: vals,
+        data: d.data,
         opacity: 0.9,
         size: 'size',
         width: 300,
@@ -76,14 +125,12 @@ observeStore(next => {
 
   panels.select('.log')
     .on('click', d => {
-      const data = next.getIn(['data', 'data'])
-        .toJS()
-        .map(x => Math.log(x[d]))
+      const data = d.data.map(x => Math.log(x))
         .filter(x => isFinite(x));
 
-      store.dispatch(action.createLogVariable(d, data));
+      store.dispatch(action.createLogVariable(d.name, data));
     });
-}, s => s.getIn(['data', 'data']));
+}, s => s.get('vars'));
 
 // When the list of datasets changes, populate the dropdown menu.
 observeStore(next => {
@@ -118,12 +165,21 @@ observeStore(next => {
 observeStore(next => {
   const logVars = next.get('logVars').toJS();
 
+  selectAll('.derived-variables')
+    .classed('hidden', logVars.length === 0);
+
+  const vars = next.get('vars').toJS();
+  selectAll('.linear-modeling')
+    .classed('hidden', vars.length + logVars.length === 0);
+
+  varsChanged(vars, logVars);
+
   // Disable "compute log transform" buttons for variables that have already
   // been log-transformed.
   select('#vars .panel')
     .selectAll('.log')
     .each(function (d) {
-      const logName = `log-${d}`;
+      const logName = `log-${d.name}`;
       let disabled = false;
       logVars.forEach(logvar => {
         if (logvar.name === logName) {
@@ -154,3 +210,44 @@ observeStore(next => {
       });
     });
 }, s => s.get('logVars'));
+
+// When the linear modeling variables change, update the menus.
+observeStore(next => {
+  const linearModel = next.get('linearModel');
+
+  // Collect the variable data.
+  const get = key => {
+    let x = linearModel.get(key);
+    if (x !== null) {
+      x = x.toJS();
+    }
+    return x;
+  };
+  const depVar = get('depVar');
+  const respVar = get('respVar');
+
+  // Set the text on the dropdown menus.
+  const setName = (which, label, v) => {
+    select(which)
+      .text(v ? `${label}: ${v.name}` : label);
+  };
+  setName('button.var1', 'Dependent Variable', depVar);
+  setName('button.var2', 'Response Variable', respVar);
+
+  // If both variables are selected, display a scatterplot of them.
+  if (depVar && respVar) {
+    const data = depVar.data.map((d, i) => ({
+      x: d,
+      y: respVar.data[i]
+    }));
+
+    const el = select('#linmodel .vis').node();
+
+    const vis = new ScatterPlot(el, { // eslint-disable-line no-unused-vars
+      data,
+      opacity: 0.9,
+      width: 600,
+      height: 600
+    });
+  }
+}, s => s.get('linearModel'));
