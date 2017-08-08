@@ -1,0 +1,3 @@
+- name: d3mLm
+  display: d3mLm
+  description: Mock TA2 module to compute a linear model from one or more predictor variables, and a single response variable.

@@ -14,6 +14,7 @@ import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
 import './index.less';
+import models from './tangelo/models.yml';
 
 json('d3mLm?data="blah"&predictor="Sepal.Width"&response="Sepal.Length"', resp => console.log(resp));
 
@@ -22,6 +23,22 @@ const dataReq = require.context('../data/csv', false, /\.csv$/);
 
 // Install the content template.
 select(document.body).html(body());
+
+// Install the model list.
+select('.model-menu')
+  .selectAll('li')
+  .data(models)
+  .enter()
+  .append('li')
+  .append('a')
+  .attr('href', '#')
+  .text(d => d.name)
+  .on('click', function (d) {
+    console.log(d);
+
+    select('.model-button')
+      .text(`Model: ${d.name}`);
+  });
 
 // Install the dataset list.
 store.dispatch(action.setDatasetList(data));
@@ -100,7 +117,7 @@ observeStore(next => {
     .classed('hidden', vars.length === 0);
 
   const logVars = next.get('logVars').toJS();
-  selectAll('.exploratory-vis')
+  selectAll('.exploratory-vis,.modeling')
     .classed('hidden', vars.length + logVars.length === 0);
 
   varsChanged(vars, logVars);
@@ -172,7 +189,7 @@ observeStore(next => {
     .classed('hidden', logVars.length === 0);
 
   const vars = next.get('vars').toJS();
-  selectAll('.exploratory-vis')
+  selectAll('.exploratory-vis,.modeling')
     .classed('hidden', vars.length + logVars.length === 0);
 
   varsChanged(vars, logVars);
