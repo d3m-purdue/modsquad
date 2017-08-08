@@ -100,7 +100,7 @@ observeStore(next => {
     .classed('hidden', vars.length === 0);
 
   const logVars = next.get('logVars').toJS();
-  selectAll('.linear-modeling')
+  selectAll('.exploratory-vis')
     .classed('hidden', vars.length + logVars.length === 0);
 
   varsChanged(vars, logVars);
@@ -172,7 +172,7 @@ observeStore(next => {
     .classed('hidden', logVars.length === 0);
 
   const vars = next.get('vars').toJS();
-  selectAll('.linear-modeling')
+  selectAll('.exploratory-vis')
     .classed('hidden', vars.length + logVars.length === 0);
 
   varsChanged(vars, logVars);
