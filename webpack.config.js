@@ -3,6 +3,7 @@ var path = require('path');
 var webpack = require('webpack');
 var candelaLoaders = require('candela/webpack');
 var HtmlPlugin = require('html-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = candelaLoaders({
   entry: {
@@ -69,6 +70,9 @@ module.exports = candelaLoaders({
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery'
-    })
+    }),
+    new CopyWebpackPlugin([
+      { from: 'src/tangelo/d3mLm.py', to: 'd3mLm.py' }
+    ])
   ]
 });
