@@ -6,7 +6,7 @@
   "scripts": {
     "data": "sh script/genData.sh",
     "build": "webpack",
-    "postinstall": "virtualenv venv && ./venv/bin/pip install tangelo",
+    "postinstall": "virtualenv venv && ./venv/bin/pip install -r requirements.txt || Rscript script/prep.R",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
     "serve": "./venv/bin/tangelo --root build",

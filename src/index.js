@@ -2,7 +2,7 @@ import 'bootstrap/dist/js/bootstrap';
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
 import { select,
          selectAll } from 'd3-selection';
-import { text } from 'd3-request';
+import { json } from 'd3-request';
 import dl from 'datalib';
 
 import { action,
@@ -15,7 +15,7 @@ import varTemplate from './template/var.jade';
 import body from './index.jade';
 import './index.less';
 
-text('d3mLm', resp => console.log(resp));
+json('d3mLm?data="blah"&predictor="Sepal.Width"&response="Sepal.Length"', resp => console.log(resp));
 
 // Construct a require context for the available data files.
 const dataReq = require.context('../data/csv', false, /\.csv$/);
