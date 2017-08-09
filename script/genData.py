@@ -47,10 +47,16 @@ def main():
     datacols = []
     for i in range(args.cols):
         if i in exp:
-            args.col_names[i] = 'exp-%s' % (args.col_names[i])
-            datacols.append([-math.log(getPositiveSample()) / 0.01 for _ in range(args.rows)])
+            args.col_names[i] = 'exp_%s' % (args.col_names[i])
+            col = [-math.log(getPositiveSample()) / 0.01 for _ in range(args.rows)]
         else:
-            datacols.append([random.gauss(0, 1) for _ in range(args.rows)])
+            col = [random.gauss(0, 1) for _ in range(args.rows)]
+
+        m = min(col)
+        if m < 0.0:
+            col = [c - 2 * m for c in col]
+
+        datacols.append(col)
 
     # Transpose to rows.
     datarows = zip(*datacols)
