@@ -284,7 +284,13 @@ observeStore(next => {
 
   // If both variables are selected, display a scatterplot of them.
   if (predVar && respVar) {
-    json('d3mLm?data="blah"&predictor="Sepal.Width"&response="Sepal.Length"', resp => {
+    // Construct a data table.
+    const data = {
+      [predVar.name]: predVar.data,
+      [respVar.name]: respVar.data
+    };
+
+    json(`d3mLm?data=${JSON.stringify(data)}&predictor="${predVar.name}"&response="${respVar.name}"`, resp => {
       select('pre.info')
         .classed('hidden', false)
         .text(JSON.stringify(resp, null, 2));

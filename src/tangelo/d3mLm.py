@@ -10,7 +10,10 @@ fn = rpy2.robjects.r('''fn <- function(dt, response, preds) {
 
 
 def make_frame(data):
-    return rpy2.robjects.r['iris']
+    for k in data:
+        data[k] = rpy2.robjects.FloatVector(data[k])
+
+    return rpy2.robjects.DataFrame(data)
 
 
 @tangelo.types(data=json.loads, predictor=json.loads, response=json.loads)
