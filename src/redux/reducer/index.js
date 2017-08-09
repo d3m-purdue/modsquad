@@ -46,7 +46,7 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.createLogVariable:
       newState = state.update('logVars', vars => vars.push(Immutable.fromJS({
-        name: `log-${action.name}`,
+        name: `log_${action.name}`,
         data: action.data
       })));
       break;

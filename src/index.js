@@ -186,7 +186,7 @@ observeStore(next => {
   select('#vars .panel')
     .selectAll('.log')
     .each(function (d) {
-      const logName = `log-${d.name}`;
+      const logName = `log_${d.name}`;
       let disabled = false;
       logVars.forEach(logvar => {
         if (logvar.name === logName) {

@@ -47,7 +47,7 @@ def main():
     datacols = []
     for i in range(args.cols):
         if i in exp:
-            args.col_names[i] = 'exp-%s' % (args.col_names[i])
+            args.col_names[i] = 'exp_%s' % (args.col_names[i])
             datacols.append([-math.log(getPositiveSample()) / 0.01 for _ in range(args.rows)])
         else:
             datacols.append([random.gauss(0, 1) for _ in range(args.rows)])
