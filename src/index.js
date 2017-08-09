@@ -24,22 +24,6 @@ const dataReq = require.context('../data/csv', false, /\.csv$/);
 // Install the content template.
 select(document.body).html(body());
 
-// Install the model list.
-select('.model-menu')
-  .selectAll('li')
-  .data(models)
-  .enter()
-  .append('li')
-  .append('a')
-  .attr('href', '#')
-  .text(d => d.name)
-  .on('click', function (d) {
-    console.log(d);
-
-    select('.model-button')
-      .text(`Model: ${d.name}`);
-  });
-
 // Install the dataset list.
 store.dispatch(action.setDatasetList(data));
 
@@ -86,12 +70,12 @@ observeStore(next => {
   window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
 }, s => s.getIn(['data', 'data']));
 
-const varsChanged = (vars, logVars) => {
-  const allVars = [].concat(vars, logVars);
+const varsChanged = (origVars, logVars) => {
+  const vars = [].concat(origVars, logVars);
 
-  const fillMenu = (sel, which) => {
+  const fillMenu = (sel, which, act) => {
     const menu = sel.selectAll('li')
-      .data(allVars);
+      .data(vars);
 
     menu.enter()
       .append('li')
@@ -99,15 +83,20 @@ const varsChanged = (vars, logVars) => {
       .attr('href', '#')
       .text(d => d.name)
       .on('click', d => {
-        store.dispatch(action.setLinearModelVar(which, d));
+        store.dispatch(act(which, d));
       });
 
     menu.exit()
       .remove();
   };
 
-  fillMenu(select('.variable1'), 0);
-  fillMenu(select('.variable2'), 1);
+  // Fill the variable menus in the exploratory vis section.
+  fillMenu(select('.variable1'), 0, action.setExploratoryVar);
+  fillMenu(select('.variable2'), 1, action.setExploratoryVar);
+
+  // Fill the variable menus in the modeling section.
+  fillMenu(select('.predictor-menu'), 0, action.setModelingVar);
+  fillMenu(select('.response-menu'), 1, action.setModelingVar);
 };
 
 observeStore(next => {
@@ -231,34 +220,34 @@ observeStore(next => {
     });
 }, s => s.get('logVars'));
 
-// When the linear modeling variables change, update the menus.
+// When the exploratory vis variables change, update the menus.
 observeStore(next => {
-  const linearModel = next.get('linearModel');
+  const exploratoryVis = next.get('exploratoryVis');
 
   // Collect the variable data.
   const get = key => {
-    let x = linearModel.get(key);
+    let x = exploratoryVis.get(key);
     if (x !== null) {
       x = x.toJS();
     }
     return x;
   };
-  const depVar = get('depVar');
-  const respVar = get('respVar');
+  const xVar = get('xVar');
+  const yVar = get('yVar');
 
   // Set the text on the dropdown menus.
   const setName = (which, label, v) => {
     select(which)
       .text(v ? `${label}: ${v.name}` : label);
   };
-  setName('button.var1', 'Dependent Variable', depVar);
-  setName('button.var2', 'Response Variable', respVar);
+  setName('button.var1', 'X', xVar);
+  setName('button.var2', 'Y', yVar);
 
   // If both variables are selected, display a scatterplot of them.
-  if (depVar && respVar) {
-    const data = depVar.data.map((d, i) => ({
+  if (xVar && yVar) {
+    const data = xVar.data.map((d, i) => ({
       x: d,
-      y: respVar.data[i]
+      y: yVar.data[i]
     }));
 
     const el = select('#linmodel .vis').node();
@@ -270,4 +259,34 @@ observeStore(next => {
       height: 600
     });
   }
-}, s => s.get('linearModel'));
+}, s => s.get('exploratoryVis'));
+
+// When the modeling vis variables change, update the menus.
+observeStore(next => {
+  const modeling = next.get('modeling');
+
+  // Collect the variable data.
+  const get = key => {
+    let x = modeling.get(key);
+    if (x !== null) {
+      x = x.toJS();
+    }
+    return x;
+  };
+  const predVar = get('predVar');
+  const respVar = get('respVar');
+
+  // Set the text on the dropdown menus.
+  const setName = (which, label, v) => {
+    select(which)
+      .text(v ? `${label}: ${v.name}` : label);
+  };
+  setName('button.predictor', 'Predictor', predVar);
+  setName('button.response', 'Response', respVar);
+
+  // If both variables are selected, display a scatterplot of them.
+  if (predVar && respVar) {
+    console.log('predVar', predVar.name);
+    console.log('respVar', respVar.name);
+  }
+}, s => s.get('modeling'));

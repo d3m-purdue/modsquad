@@ -29,11 +29,11 @@ nav.navbar.navbar-inverse
         h4 Exploratory Visualization
         #linmodel
           span.dropdown
-            button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Variable 1
+            button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
             ul.dropdown-menu.variable1
 
           span.dropdown
-            button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Variable 2
+            button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
             ul.dropdown-menu.variable2
 
           .vis
@@ -42,6 +42,11 @@ nav.navbar.navbar-inverse
     .col-md-6
       .modeling
         h4 Modeling
-        span.dropdown
-          button.model-button.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
-          ul.dropdown-menu.model-menu
+        div
+          span.dropdown
+            button.predictor.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Predictor
+            ul.dropdown-menu.predictor-menu
+
+          span.dropdown
+            button.response.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Response
+            ul.dropdown-menu.response-menu

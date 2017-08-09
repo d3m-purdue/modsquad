@@ -10,8 +10,12 @@ const initial = Immutable.fromJS({
   },
   vars: [],
   logVars: [],
-  linearModel: {
-    depVar: null,
+  exploratoryVis: {
+    xVar: null,
+    yVar: null
+  },
+  modeling: {
+    predVar: null,
     respVar: null
   }
 });
@@ -47,11 +51,21 @@ const reducer = (state = initial, action = {}) => {
       })));
       break;
 
-    case actionType.setLinearModelVar:
+    case actionType.setExploratoryVar:
       if (action.which === 0) {
-        newState = state.setIn(['linearModel', 'depVar'], Immutable.fromJS(action.var));
+        newState = state.setIn(['exploratoryVis', 'xVar'], Immutable.fromJS(action.var));
       } else if (action.which === 1) {
-        newState = state.setIn(['linearModel', 'respVar'], Immutable.fromJS(action.var));
+        newState = state.setIn(['exploratoryVis', 'yVar'], Immutable.fromJS(action.var));
+      } else {
+        throw new Error(`illegal action.which: ${action.which}`);
+      }
+      break;
+
+    case actionType.setModelingVar:
+      if (action.which === 0) {
+        newState = state.setIn(['modeling', 'predVar'], Immutable.fromJS(action.var));
+      } else if (action.which === 1) {
+        newState = state.setIn(['modeling', 'respVar'], Immutable.fromJS(action.var));
       } else {
         throw new Error(`illegal action.which: ${action.which}`);
       }
