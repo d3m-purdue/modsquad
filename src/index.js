@@ -16,8 +16,6 @@ import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
 
-json('d3mLm?data="blah"&predictor="Sepal.Width"&response="Sepal.Length"', resp => console.log(resp));
-
 // Construct a require context for the available data files.
 const dataReq = require.context('../data/csv', false, /\.csv$/);
 
@@ -286,7 +284,10 @@ observeStore(next => {
 
   // If both variables are selected, display a scatterplot of them.
   if (predVar && respVar) {
-    console.log('predVar', predVar.name);
-    console.log('respVar', respVar.name);
+    json('d3mLm?data="blah"&predictor="Sepal.Width"&response="Sepal.Length"', resp => {
+      select('pre.info')
+        .classed('hidden', false)
+        .text(JSON.stringify(resp, null, 2));
+    });
   }
 }, s => s.get('modeling'));
