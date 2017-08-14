@@ -290,7 +290,7 @@ observeStore(next => {
       [respVar.name]: respVar.data
     };
 
-    json(`d3mLm?data=${JSON.stringify(data)}&predictor="${predVar.name}"&response="${respVar.name}"`, resp => {
+    json(`d3mLm/linear?data=${JSON.stringify(data)}&predictor="${predVar.name}"&response="${respVar.name}"`, resp => {
       select('pre.info')
         .classed('hidden', false)
         .text(JSON.stringify(resp, null, 2));

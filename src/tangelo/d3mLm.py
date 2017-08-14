@@ -2,11 +2,11 @@ import json
 import rpy2.robjects
 import tangelo
 
-fn = rpy2.robjects.r('''fn <- function(dt, response, preds) {
-  formu <- as.formula(paste(response, "~", paste(preds, collapse = " + ")))
-  mod <- lm(formu, data = dt)
-  d3mLm::extract_lm(mod)$as_json()
-}''')
+# Load the d3mLm library and "export" some functions from it.
+rpy2.robjects.r('library("d3mLm")')
+run_lm = rpy2.robjects.r['run_lm']
+run_quadratic = rpy2.robjects.r['run_quadratic']
+run_loess = rpy2.robjects.r['run_loess']
 
 
 def make_frame(data):
@@ -16,11 +16,40 @@ def make_frame(data):
     return rpy2.robjects.DataFrame(data)
 
 
-@tangelo.types(data=json.loads, predictor=json.loads, response=json.loads)
-def run(data=None, predictor=None, response=None):
-    if predictor is None or response is None or data is None:
+def select_method(method):
+    fn = None
+
+    if method == 'linear':
+        fn = run_lm
+    elif method == 'quadratic':
+        fn = run_quadratic
+    elif method == 'loess':
+        fn = run_loess
+
+    return fn
+
+
+def run(method=None, data=None, predictor=None, response=None, quadratic=None):
+    if method is None or predictor is None or response is None or data is None:
+        tangelo.http_status(400, 'Required argument missing')
         return None
+
+    fn = select_method(method)
+    if fn is None:
+        tangelo.http_status(400, 'Required argument missing')
+        return None
+
+    if fn == run_quadratic:
+        if quadratic is None:
+            tangelo.http_status(400, 'Required argument missing')
+            return None
+        else:
+            quadratic = json.loads(quadratic)
+
+    data = json.loads(data)
+    predictor = json.loads(predictor)
+    response = json.loads(response)
 
     dataframe = make_frame(data)
 
-    return json.loads(str(fn(dataframe, response, predictor)))
+    return str(fn(dataframe, response, predictor))
