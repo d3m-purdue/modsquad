@@ -109,10 +109,6 @@ const varsChanged = (origVars, logVars) => {
   // Fill the variable menus in the exploratory vis section.
   fillMenu(select('.variable1'), 0, action.setExploratoryVar);
   fillMenu(select('.variable2'), 1, action.setExploratoryVar);
-
-  // Fill the variable menus in the modeling section.
-  fillMenu(select('.predictor-menu'), 0, action.setModelingVar);
-  fillMenu(select('.response-menu'), 1, action.setModelingVar);
 };
 
 observeStore(next => {
@@ -344,7 +340,7 @@ observeStore(next => {
     .attr('href', '#')
     .text(d => d.name)
     .on('click', d => {
-      console.log(d);
+      store.dispatch(action.setModelingVar(d.variable, d));
     });
 
   window.setTimeout(() => store.dispatch(action.setModelInputVars(null)), 0);
@@ -359,8 +355,9 @@ observeStore((next, last) => {
 
   const modeling = next.getIn(['modeling', 'inputVars']);
 
-  console.log(modeling);
-  return;
+  if (modeling === null) {
+    return;
+  }
 
   // Collect the variable data.
   const get = key => {
@@ -370,26 +367,36 @@ observeStore((next, last) => {
     }
     return x;
   };
-  const predVar = get('predVar');
-  const respVar = get('respVar');
+
+  const inputVars = modeling.toJS();
+  const vars = Object.keys(inputVars).map(get);
 
   // Set the text on the dropdown menus.
   const setName = (which, label, v) => {
     select(which)
       .text(v ? `${label}: ${v.name}` : label);
   };
-  setName('button.predictor', 'Predictor', predVar);
-  setName('button.response', 'Response', respVar);
+  Object.keys(inputVars).forEach(k => {
+    const v = inputVars[k];
+    setName(`button.${k}`, k, v);
+  });
 
-  // If both variables are selected, display a scatterplot of them.
-  if (predVar && respVar) {
+  // If all variables are selected, run a model and display the results.
+  if (vars.indexOf(null) < 0) {
     // Construct a data table.
-    const data = {
-      [predVar.name]: predVar.data,
-      [respVar.name]: respVar.data
-    };
+    let data = {};
+    vars.forEach(v => {
+      data[v.name] = v.data;
+    });
 
-    json(`d3mLm/linear?data=${JSON.stringify(data)}&predictor="${predVar.name}"&response="${respVar.name}"`, resp => {
+    // Construct a Tangelo service URL.
+    let url = `d3mLm/${next.getIn(['modeling', 'model'])}?data=${JSON.stringify(data)}`;
+    vars.forEach(v => {
+      url += `&${v.variable}="${v.name}"`;
+    });
+
+    // Execute the service and display the result.
+    json(url, resp => {
       select('pre.info')
         .classed('hidden', false)
         .text(JSON.stringify(resp, null, 2));

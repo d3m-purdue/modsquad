@@ -84,13 +84,7 @@ const reducer = (state = initial, action = {}) => {
       break;
 
     case actionType.setModelingVar:
-      if (action.which === 0) {
-        newState = state.setIn(['modeling', 'predVar'], Immutable.fromJS(action.var));
-      } else if (action.which === 1) {
-        newState = state.setIn(['modeling', 'respVar'], Immutable.fromJS(action.var));
-      } else {
-        throw new Error(`illegal action.which: ${action.which}`);
-      }
+      newState = state.setIn(['modeling', 'inputVars', action.which], Immutable.fromJS(action.var));
       break;
   }
 
