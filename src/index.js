@@ -10,6 +10,7 @@ import { action,
          observeStore } from './redux';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
+import { allVars } from './util';
 import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
@@ -24,6 +25,23 @@ select(document.body).html(body());
 
 // Install the dataset list.
 store.dispatch(action.setDatasetList(data));
+
+// Install the model choices.
+select('ul.model-menu')
+  .selectAll('li')
+  .data([
+    'linear',
+    'quadratic',
+    'loess'
+  ])
+  .enter()
+  .append('li')
+  .append('a')
+  .attr('href', '#')
+  .text(d => d)
+  .on('click', d => {
+    store.dispatch(action.setModelType(d));
+  });
 
 // When the active dataset changes, set the dropdown menu's text to the name of
 // the dataset.
@@ -259,9 +277,90 @@ observeStore(next => {
   }
 }, s => s.get('exploratoryVis'));
 
-// When the modeling vis variables change, update the menus.
+// When the model changes, update the input variables.
 observeStore(next => {
-  const modeling = next.get('modeling');
+  const model = next.getIn(['modeling', 'model']);
+  let buttons = [];
+
+  switch (model) {
+  case 'linear':
+  case 'loess':
+    buttons.push('predictor');
+    buttons.push('response');
+    break;
+
+  case 'quadratic':
+    buttons.push('predictor');
+    buttons.push('response');
+    buttons.push('quadratic');
+    break;
+
+  case null:
+    break;
+
+  default:
+    throw new Error(`illegal model type: ${model}`);
+  }
+
+  select('button.model')
+    .text(model === null ? 'Model' : `Model: ${model}`);
+
+  select('.model-vars')
+    .selectAll('*')
+    .remove();
+
+  const sel = select('.model-vars')
+    .selectAll('span.dropdown')
+    .data(buttons)
+    .enter()
+    .append('span')
+    .classed('dropdown', true);
+
+  sel.append('button')
+    .classed('btn btn-default dropdown-toggle', true)
+    .each(function (d) {
+      select(this)
+        .classed(d, true);
+    })
+    .attr('data-toggle', 'dropdown')
+    .text(d => d[0].toUpperCase() + d.slice(1));
+
+  sel.append('ul')
+    .classed('dropdown-menu', true)
+    .each(function (d) {
+      select(this)
+        .classed(`${d}-menu`, true);
+    })
+    .selectAll('li')
+    .data(d => {
+      const vars = allVars();
+      return vars.map(v => Object.assign({}, v, {
+        variable: d
+      }));
+    })
+    .enter()
+    .append('li')
+    .append('a')
+    .attr('href', '#')
+    .text(d => d.name)
+    .on('click', d => {
+      console.log(d);
+    });
+
+  window.setTimeout(() => store.dispatch(action.setModelInputVars(null)), 0);
+  window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons)), 0);
+}, s => s.getIn(['modeling', 'model']));
+
+// When the modeling vis variables change, update the menus.
+observeStore((next, last) => {
+  if (last && last.getIn(['modeling', 'inputVars']) === null) {
+    return;
+  }
+
+  const modeling = next.getIn(['modeling', 'inputVars']);
+
+  console.log(modeling);
+  return;
 
   // Collect the variable data.
   const get = key => {
@@ -296,4 +395,4 @@ observeStore(next => {
         .text(JSON.stringify(resp, null, 2));
     });
   }
-}, s => s.get('modeling'));
+}, s => s.getIn(['modeling', 'inputVars']));

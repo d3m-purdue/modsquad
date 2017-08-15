@@ -18,6 +18,12 @@ setExploratoryVar:
   - which
   - var
 
+setModelType:
+  - model
+
+setModelInputVars:
+  - vars
+
 setModelingVar:
   - which
   - var
