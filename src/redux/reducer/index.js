@@ -15,8 +15,8 @@ const initial = Immutable.fromJS({
     yVar: null
   },
   modeling: {
-    predVar: null,
-    respVar: null
+    model: null,
+    inputVars: null
   }
 });
 
@@ -61,14 +61,30 @@ const reducer = (state = initial, action = {}) => {
       }
       break;
 
-    case actionType.setModelingVar:
-      if (action.which === 0) {
-        newState = state.setIn(['modeling', 'predVar'], Immutable.fromJS(action.var));
-      } else if (action.which === 1) {
-        newState = state.setIn(['modeling', 'respVar'], Immutable.fromJS(action.var));
-      } else {
-        throw new Error(`illegal action.which: ${action.which}`);
+    case actionType.setModelType:
+      if (['linear', 'quadratic', 'loess'].indexOf(action.model) < 0) {
+        throw new Error(`illegal value for model type: ${action.model}`);
       }
+
+      newState = state.setIn(['modeling', 'model'], action.model);
+      break;
+
+    case actionType.setModelInputVars:
+      let vars = {};
+      if (action.vars === null) {
+        vars = null;
+      } else {
+        action.vars.forEach(v => {
+          vars[v] = null;
+        });
+      }
+
+      const value = vars === null ? null : Immutable.fromJS(vars);
+      newState = state.setIn(['modeling', 'inputVars'], value);
+      break;
+
+    case actionType.setModelingVar:
+      newState = state.setIn(['modeling', 'inputVars', action.which], Immutable.fromJS(action.var));
       break;
   }
 

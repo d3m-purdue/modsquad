@@ -10,6 +10,7 @@ import { action,
          observeStore } from './redux';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
+import { allVars } from './util';
 import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
@@ -24,6 +25,23 @@ select(document.body).html(body());
 
 // Install the dataset list.
 store.dispatch(action.setDatasetList(data));
+
+// Install the model choices.
+select('ul.model-menu')
+  .selectAll('li')
+  .data([
+    'linear',
+    'quadratic',
+    'loess'
+  ])
+  .enter()
+  .append('li')
+  .append('a')
+  .attr('href', '#')
+  .text(d => d)
+  .on('click', d => {
+    store.dispatch(action.setModelType(d));
+  });
 
 // When the active dataset changes, set the dropdown menu's text to the name of
 // the dataset.
@@ -91,10 +109,6 @@ const varsChanged = (origVars, logVars) => {
   // Fill the variable menus in the exploratory vis section.
   fillMenu(select('.variable1'), 0, action.setExploratoryVar);
   fillMenu(select('.variable2'), 1, action.setExploratoryVar);
-
-  // Fill the variable menus in the modeling section.
-  fillMenu(select('.predictor-menu'), 0, action.setModelingVar);
-  fillMenu(select('.response-menu'), 1, action.setModelingVar);
 };
 
 observeStore(next => {
@@ -259,9 +273,107 @@ observeStore(next => {
   }
 }, s => s.get('exploratoryVis'));
 
-// When the modeling vis variables change, update the menus.
+// When the model changes, update the input variables.
 observeStore(next => {
-  const modeling = next.get('modeling');
+  const model = next.getIn(['modeling', 'model']);
+  let buttons = [];
+
+  switch (model) {
+  case 'linear':
+  case 'loess':
+    buttons.push({
+      variableName: 'predictor_variables',
+      displayName: 'predictor'
+    });
+    buttons.push({
+      variableName: 'response',
+      displayName: 'response'
+    });
+    break;
+
+  case 'quadratic':
+    buttons.push({
+      variableName: 'predictor_variables',
+      displayName: 'predictor'
+    });
+    buttons.push({
+      variableName: 'response',
+      displayName: 'response'
+    });
+    buttons.push({
+      variableName: 'quadratic_variables',
+      displayName: 'quadratic'
+    });
+    break;
+
+  case null:
+    break;
+
+  default:
+    throw new Error(`illegal model type: ${model}`);
+  }
+
+  select('button.model')
+    .text(model === null ? 'Model' : `Model: ${model}`);
+
+  select('.model-vars')
+    .selectAll('*')
+    .remove();
+
+  const sel = select('.model-vars')
+    .selectAll('span.dropdown')
+    .data(buttons)
+    .enter()
+    .append('span')
+    .classed('dropdown', true);
+
+  sel.append('button')
+    .classed('btn btn-default dropdown-toggle', true)
+    .each(function (d) {
+      select(this)
+        .classed(d.variableName, true);
+    })
+    .attr('data-toggle', 'dropdown')
+    .text(d => d.displayName[0].toUpperCase() + d.displayName.slice(1));
+
+  sel.append('ul')
+    .classed('dropdown-menu', true)
+    .each(function (d) {
+      select(this)
+        .classed(`${d.displayName}-menu`, true);
+    })
+    .selectAll('li')
+    .data(d => {
+      const vars = allVars();
+      return vars.map(v => Object.assign({}, v, {
+        variableName: d.variableName,
+        displayName: d.displayName
+      }));
+    })
+    .enter()
+    .append('li')
+    .append('a')
+    .attr('href', '#')
+    .text(d => d.name)
+    .on('click', d => {
+      store.dispatch(action.setModelingVar(d.variableName, d));
+    });
+
+  window.setTimeout(() => store.dispatch(action.setModelInputVars(null)), 0);
+  window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons.map(x => x.variableName))), 0);
+}, s => s.getIn(['modeling', 'model']));
+
+// When the modeling vis variables change, update the menus.
+observeStore((next, last) => {
+  if (last && last.getIn(['modeling', 'inputVars']) === null) {
+    return;
+  }
+
+  const modeling = next.getIn(['modeling', 'inputVars']);
+
+  if (modeling === null) {
+    return;
+  }
 
   // Collect the variable data.
   const get = key => {
@@ -271,29 +383,41 @@ observeStore(next => {
     }
     return x;
   };
-  const predVar = get('predVar');
-  const respVar = get('respVar');
+
+  const inputVars = modeling.toJS();
+  const vars = Object.keys(inputVars).map(get);
 
   // Set the text on the dropdown menus.
   const setName = (which, label, v) => {
     select(which)
       .text(v ? `${label}: ${v.name}` : label);
   };
-  setName('button.predictor', 'Predictor', predVar);
-  setName('button.response', 'Response', respVar);
+  Object.keys(inputVars).forEach(k => {
+    const v = inputVars[k];
+    if (v !== null) {
+      setName(`button.${v.variableName}`, v.displayName, v);
+    }
+  });
 
-  // If both variables are selected, display a scatterplot of them.
-  if (predVar && respVar) {
+  // If all variables are selected, run a model and display the results.
+  if (vars.indexOf(null) < 0) {
     // Construct a data table.
-    const data = {
-      [predVar.name]: predVar.data,
-      [respVar.name]: respVar.data
-    };
+    let data = {};
+    vars.forEach(v => {
+      data[v.name] = v.data;
+    });
 
-    json(`d3mLm?data=${JSON.stringify(data)}&predictor="${predVar.name}"&response="${respVar.name}"`, resp => {
+    // Construct a Tangelo service URL.
+    let url = `d3mLm/${next.getIn(['modeling', 'model'])}?data=${JSON.stringify(data)}`;
+    vars.forEach(v => {
+      url += `&${v.variableName}="${v.name}"`;
+    });
+
+    // Execute the service and display the result.
+    json(url, resp => {
       select('pre.info')
         .classed('hidden', false)
         .text(JSON.stringify(resp, null, 2));
     });
   }
-}, s => s.get('modeling'));
+}, s => s.getIn(['modeling', 'inputVars']));
