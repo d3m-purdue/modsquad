@@ -28,7 +28,7 @@
     "babel-preset-es2015": "^6.24.1",
     "bootstrap": "^3.3.7",
     "bootswatch": "^3.3.7",
-    "candela": "^0.15.0",
+    "candela": "^0.17.0",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.4",
     "d3-selection": "^1.1.0",
