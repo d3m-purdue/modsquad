@@ -266,10 +266,13 @@ observeStore(next => {
 
     const vis = new ScatterPlot(el, { // eslint-disable-line no-unused-vars
       data,
+      x: 'x',
+      y: 'y',
       opacity: 0.9,
       width: 600,
       height: 600
     });
+    vis.render();
   }
 }, s => s.get('exploratoryVis'));
 
