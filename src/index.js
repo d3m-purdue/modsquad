@@ -281,14 +281,14 @@ observeStore(next => {
   switch (model) {
   case 'linear':
   case 'loess':
-    buttons.push('predictor');
+    buttons.push('predictor_variables');
     buttons.push('response');
     break;
 
   case 'quadratic':
-    buttons.push('predictor');
+    buttons.push('predictor_variables');
     buttons.push('response');
-    buttons.push('quadratic');
+    buttons.push('quadratic_variables');
     break;
 
   case null:

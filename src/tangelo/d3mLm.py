@@ -29,8 +29,8 @@ def select_method(method):
     return fn
 
 
-def run(method=None, data=None, predictor=None, response=None, quadratic=None):
-    if method is None or predictor is None or response is None or data is None:
+def run(method=None, data=None, **kwargs):
+    if data is None:
         tangelo.http_status(400, 'Required argument missing')
         return None
 
@@ -39,17 +39,29 @@ def run(method=None, data=None, predictor=None, response=None, quadratic=None):
         tangelo.http_status(400, 'Required argument missing')
         return None
 
-    if fn == run_quadratic:
-        if quadratic is None:
-            tangelo.http_status(400, 'Required argument missing')
-            return None
-        else:
-            quadratic = json.loads(quadratic)
-
     data = json.loads(data)
-    predictor = json.loads(predictor)
-    response = json.loads(response)
-
     dataframe = make_frame(data)
 
-    return str(fn(dataframe, response, predictor))
+    if fn == run_quadratic:
+        predictor_variables = kwargs.get('predictor_variables')
+        response = kwargs.get('response')
+        quadratic_variables = kwargs.get('quadratic_variables')
+
+        if predictor_variables is None or response is None or quadratic_variables is None:
+            tangelo.http_status(400, 'Required argument missing')
+            return None
+
+        args = map(json.loads, [response, predictor_variables, quadratic_variables])
+    elif fn in [run_lm, run_loess]:
+        predictor_variables = kwargs.get('predictor_variables')
+        response = kwargs.get('response')
+
+        if predictor_variables is None or response is None:
+            tangelo.http_status(400, 'Required argument missing')
+            return None
+
+        args = map(json.loads, [response, predictor_variables])
+    else:
+        tangelo.http_status(500, 'Impossible condition')
+
+    return str(fn(dataframe, *args))
