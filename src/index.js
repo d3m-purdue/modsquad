@@ -262,9 +262,11 @@ observeStore(next => {
       y: yVar.data[i]
     }));
 
-    const el = select('#linmodel .vis').node();
+    const el = select('#linmodel .vis');
+    el.selectAll('*')
+      .remove();
 
-    const vis = new ScatterPlot(el, { // eslint-disable-line no-unused-vars
+    const vis = new ScatterPlot(el.node(), { // eslint-disable-line no-unused-vars
       data,
       x: 'x',
       y: 'y',
