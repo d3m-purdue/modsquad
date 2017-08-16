@@ -281,14 +281,29 @@ observeStore(next => {
   switch (model) {
   case 'linear':
   case 'loess':
-    buttons.push('predictor_variables');
-    buttons.push('response');
+    buttons.push({
+      variableName: 'predictor_variables',
+      displayName: 'predictor'
+    });
+    buttons.push({
+      variableName: 'response',
+      displayName: 'response'
+    });
     break;
 
   case 'quadratic':
-    buttons.push('predictor_variables');
-    buttons.push('response');
-    buttons.push('quadratic_variables');
+    buttons.push({
+      variableName: 'predictor_variables',
+      displayName: 'predictor'
+    });
+    buttons.push({
+      variableName: 'response',
+      displayName: 'response'
+    });
+    buttons.push({
+      variableName: 'quadratic_variables',
+      displayName: 'quadratic'
+    });
     break;
 
   case null:
@@ -316,22 +331,23 @@ observeStore(next => {
     .classed('btn btn-default dropdown-toggle', true)
     .each(function (d) {
       select(this)
-        .classed(d, true);
+        .classed(d.variableName, true);
     })
     .attr('data-toggle', 'dropdown')
-    .text(d => d[0].toUpperCase() + d.slice(1));
+    .text(d => d.displayName[0].toUpperCase() + d.displayName.slice(1));
 
   sel.append('ul')
     .classed('dropdown-menu', true)
     .each(function (d) {
       select(this)
-        .classed(`${d}-menu`, true);
+        .classed(`${d.displayName}-menu`, true);
     })
     .selectAll('li')
     .data(d => {
       const vars = allVars();
       return vars.map(v => Object.assign({}, v, {
-        variable: d
+        variableName: d.variableName,
+        displayName: d.displayName
       }));
     })
     .enter()
@@ -340,11 +356,11 @@ observeStore(next => {
     .attr('href', '#')
     .text(d => d.name)
     .on('click', d => {
-      store.dispatch(action.setModelingVar(d.variable, d));
+      store.dispatch(action.setModelingVar(d.variableName, d));
     });
 
   window.setTimeout(() => store.dispatch(action.setModelInputVars(null)), 0);
-  window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons)), 0);
+  window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons.map(x => x.variableName))), 0);
 }, s => s.getIn(['modeling', 'model']));
 
 // When the modeling vis variables change, update the menus.
@@ -378,7 +394,9 @@ observeStore((next, last) => {
   };
   Object.keys(inputVars).forEach(k => {
     const v = inputVars[k];
-    setName(`button.${k}`, k, v);
+    if (v !== null) {
+      setName(`button.${v.variableName}`, v.displayName, v);
+    }
   });
 
   // If all variables are selected, run a model and display the results.
@@ -392,7 +410,7 @@ observeStore((next, last) => {
     // Construct a Tangelo service URL.
     let url = `d3mLm/${next.getIn(['modeling', 'model'])}?data=${JSON.stringify(data)}`;
     vars.forEach(v => {
-      url += `&${v.variable}="${v.name}"`;
+      url += `&${v.variableName}="${v.name}"`;
     });
 
     // Execute the service and display the result.
