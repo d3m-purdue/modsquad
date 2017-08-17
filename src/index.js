@@ -138,10 +138,10 @@ observeStore(next => {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        size: 'size',
         width: 300,
         height: 200
       });
+      vis.render();
     });
 
   panels.select('.log')
@@ -225,10 +225,10 @@ observeStore(next => {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        size: 'size',
         width: 300,
         height: 200
       });
+      vis.render();
     });
 }, s => s.get('logVars'));
 
@@ -262,14 +262,19 @@ observeStore(next => {
       y: yVar.data[i]
     }));
 
-    const el = select('#linmodel .vis').node();
+    const el = select('#linmodel .vis');
+    el.selectAll('*')
+      .remove();
 
-    const vis = new ScatterPlot(el, { // eslint-disable-line no-unused-vars
+    const vis = new ScatterPlot(el.node(), { // eslint-disable-line no-unused-vars
       data,
+      x: 'x',
+      y: 'y',
       opacity: 0.9,
       width: 600,
       height: 600
     });
+    vis.render();
   }
 }, s => s.get('exploratoryVis'));
 

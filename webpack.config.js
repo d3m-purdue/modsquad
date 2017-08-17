@@ -6,6 +6,7 @@ var HtmlPlugin = require('html-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = candelaLoaders({
+  devtool: 'cheap-module-eval-source-map',
   entry: {
     index: './src/index.js'
   },

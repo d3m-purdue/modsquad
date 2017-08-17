@@ -26,8 +26,7 @@ const xformData = (opts) => {
   data.forEach((d, i) => {
     newData.push({
       value: d,
-      order: order[i],
-      size: 2
+      order: order[i]
     });
   });
 
