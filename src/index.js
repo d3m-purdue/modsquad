@@ -138,10 +138,10 @@ observeStore(next => {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        size: 'size',
         width: 300,
         height: 200
       });
+      vis.render();
     });
 
   panels.select('.log')
@@ -225,10 +225,10 @@ observeStore(next => {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        size: 'size',
         width: 300,
         height: 200
       });
+      vis.render();
     });
 }, s => s.get('logVars'));
 
