@@ -7,10 +7,10 @@
     "data": "sh script/genData.sh",
     "build": "webpack",
     "pythonprep": "virtualenv --no-setuptools venv && ./venv/bin/pip install -r requirements.txt",
-    "rprep": "Rscript script/prep.R",
+    "rprep": "mkdir -p rlib && Rscript script/prep.R",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "./venv/bin/tangelo --root build",
+    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --root build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

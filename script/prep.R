@@ -1,4 +1,6 @@
+library(curl)
 library(devtools)
+library(httr)
 library(withr)
 
 options(unzip="internal")
