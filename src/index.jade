@@ -10,44 +10,54 @@ nav.navbar.navbar-inverse
           a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-expanded="false")
           ul.dropdown-menu(role="menu")
 
-.container-fluid
-  .row
-    .col-md-3
-      .original-variables
-        h4 Original variables
-        #vars.panel-group(role="tablist" aria-multiselectable="true")
-          .panel.panel-default
+ul.nav.nav-tabs
+  li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
+  li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
+  li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
 
-    .col-md-3
-      .derived-variables
-        h4 Derived variables
-        #logvars.panel-group(role="tablist" aria-multiselectable="true")
-          .panel.panel-default
+.tab-content
+  #variables.tab-pane.fade.in
+    .container-fluid
+      .row
+        .col-md-3
+          .original-variables
+            h4 Original variables
+            #vars.panel-group(role="tablist" aria-multiselectable="true")
+              .panel.panel-default
 
-    .col-md-6
-      .exploratory-vis
-        h4 Exploratory Visualization
-        #linmodel
-          span.dropdown
-            button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            ul.dropdown-menu.variable1
+        .col-md-3
+          .derived-variables
+            h4 Derived variables
+            #logvars.panel-group(role="tablist" aria-multiselectable="true")
+              .panel.panel-default
 
-          span.dropdown
-            button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            ul.dropdown-menu.variable2
+  #exploratory-vis.tab-pane.fade.in
+    .container-fluid
+      .col-md-6
+        .exploratory-vis
+          h4 Exploratory Visualization
+          #linmodel
+            span.dropdown
+              button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+              ul.dropdown-menu.variable1
 
-          .vis
+            span.dropdown
+              button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+              ul.dropdown-menu.variable2
 
-  .row
-    .col-md-6
-      .modeling
-        h4 Modeling
-        div
-          span.dropdown
-            button.model.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
-            ul.dropdown-menu.model-menu
+            .vis
 
-        div.model-vars
+  #modeling.tab-pane.fade.in
+    .row
+      .col-md-6
+        .modeling
+          h4 Modeling
+          div
+            span.dropdown
+              button.model.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
+              ul.dropdown-menu.model-menu
 
-        div
-          pre.info.hidden
+          div.model-vars
+
+          div
+            pre.info.hidden
