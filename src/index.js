@@ -4,6 +4,7 @@ import { select,
          selectAll } from 'd3-selection';
 import { json } from 'd3-request';
 import dl from 'datalib';
+import Remarkable from 'remarkable';
 
 import { action,
          store,
@@ -19,6 +20,9 @@ import models from './tangelo/models.yml';
 
 // Construct a require context for the available data files.
 const dataReq = require.context('../data/csv', false, /\.csv$/);
+
+// Construct a markdown renderer.
+const md = new Remarkable();
 
 // Install the content template.
 select(document.body).html(body());
@@ -181,7 +185,8 @@ observeStore(next => {
     .on('click', prob => {
       button.text(prob.problemId);
 
-      console.log(prob);
+      select('.description')
+        .html(md.render(prob.description));
     });
 }, s => s.get('problems'));
 

@@ -48,6 +48,7 @@
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
+    "remarkable": "^1.7.1",
     "semistandard": "^11.0.0",
     "snazzy": "^7.0.0",
     "strip-json-comments-loader": "0.0.2",
