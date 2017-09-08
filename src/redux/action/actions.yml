@@ -1,3 +1,6 @@
+setProblemList:
+  - problems
+
 setDatasetList:
   - datasets
 

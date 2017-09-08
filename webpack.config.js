@@ -73,7 +73,8 @@ module.exports = candelaLoaders({
       jQuery: 'jquery'
     }),
     new CopyWebpackPlugin([
-      { from: 'src/tangelo/d3mLm.py', to: 'd3mLm.py' }
+      { from: 'src/tangelo/d3mLm.py', to: 'd3mLm.py' },
+      { from: 'src/tangelo/dataset.py', to: 'dataset.py' }
     ])
   ]
 });

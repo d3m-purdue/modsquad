@@ -11,11 +11,23 @@ nav.navbar.navbar-inverse
           ul.dropdown-menu(role="menu")
 
 ul.nav.nav-tabs
+  li.active: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
   li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
 
 .tab-content
+  #problems.tab-pane.fade.active.in
+    .container-fluid
+      .row
+        .col-md-3
+          .problems
+            h4 Problems
+            #problems
+              span.dropdown
+                button.problems.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Problems
+                ul.dropdown-menu.problems
+
   #variables.tab-pane.fade.in
     .container-fluid
       .row

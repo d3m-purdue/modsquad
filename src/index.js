@@ -23,6 +23,11 @@ const dataReq = require.context('../data/csv', false, /\.csv$/);
 // Install the content template.
 select(document.body).html(body());
 
+// Install the list of problems.
+json('/dataset/list', problems => {
+  store.dispatch(action.setProblemList(problems));
+});
+
 // Install the dataset list.
 store.dispatch(action.setDatasetList(data));
 
@@ -152,6 +157,33 @@ observeStore(next => {
       store.dispatch(action.createLogVariable(d.name, data));
     });
 }, s => s.get('vars'));
+
+// When the list of problems changes, populate the problems tab menu.
+observeStore(next => {
+  const problems = next.get('problems').toJS();
+
+  // Get a reference to the button.
+  const button = select('button.problems');
+
+  // Empty the menu.
+  const ul = select('ul.problems');
+  ul.selectAll('*')
+    .remove();
+
+  // Fill the menu with the problem names.
+  ul.selectAll('li')
+    .data(problems)
+    .enter()
+    .append('li')
+    .append('a')
+    .attr('href', '#')
+    .text(d => d.problemId)
+    .on('click', prob => {
+      button.text(prob.problemId);
+
+      console.log(prob);
+    });
+}, s => s.get('problems'));
 
 // When the list of datasets changes, populate the dropdown menu.
 observeStore(next => {
