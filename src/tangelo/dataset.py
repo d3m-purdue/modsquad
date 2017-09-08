@@ -1,3 +1,5 @@
+import csv
+import gzip
 import json
 import os
 import tangelo
@@ -6,6 +8,8 @@ import tangelo
 def run(op, *args, **kwargs):
     if op == 'list':
         return listDatasets()
+    elif op == 'data':
+        return getDataset(*args, **kwargs)
     else:
         tangelo.http_status(404)
         return 'illegal operation "%s"' % (op) if op else 'missing operation'
@@ -32,6 +36,19 @@ def listDatasets():
             description = f.read()
 
         problems.append({'problemId': schema['problemId'],
-                         'description': description})
+                         'description': description,
+                         'dataFile': '%s' % (os.path.basename(dirpath))})
 
     return problems
+
+
+def getDataset(name):
+    datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv.gz'))
+    reader = csv.reader(gzip.GzipFile(datafile))
+    rows = list(reader)
+
+    dicts = []
+    for row in rows[1:]:
+        dicts.append({k: v for k, v in zip(rows[0], row)})
+
+    return dicts
