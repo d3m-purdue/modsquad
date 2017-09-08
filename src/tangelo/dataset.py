@@ -42,6 +42,18 @@ def listDatasets():
     return problems
 
 
+def promote(value):
+    try:
+        value = int(value)
+    except ValueError:
+        try:
+            value = float(value)
+        except ValueError:
+            pass
+
+    return value
+
+
 def getDataset(name):
     datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv.gz'))
     reader = csv.reader(gzip.GzipFile(datafile))
@@ -49,6 +61,6 @@ def getDataset(name):
 
     dicts = []
     for row in rows[1:]:
-        dicts.append({k: v for k, v in zip(rows[0], row)})
+        dicts.append({k: promote(v) for k, v in zip(rows[0], row)})
 
     return dicts
