@@ -4,8 +4,6 @@ import { actionType } from '../action';
 
 const initial = Immutable.fromJS({
   data: {
-    which: -1,
-    datasets: [],
     data: null
   },
   problems: [],
@@ -31,14 +29,6 @@ const reducer = (state = initial, action = {}) => {
   switch (action.type) {
     case actionType.setProblemList:
       newState = state.set('problems', Immutable.fromJS(action.problems));
-      break;
-
-    case actionType.setDatasetList:
-      newState = state.setIn(['data', 'datasets'], Immutable.fromJS(action.datasets));
-      break;
-
-    case actionType.setActiveDataset:
-      newState = state.setIn(['data', 'which'], action.index);
       break;
 
     case actionType.setActiveData:

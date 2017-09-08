@@ -18,9 +18,6 @@ import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
 
-// Construct a require context for the available data files.
-const dataReq = require.context('../data/csv', false, /\.csv$/);
-
 // Construct a markdown renderer.
 const md = new Remarkable();
 
@@ -31,9 +28,6 @@ select(document.body).html(body());
 json('/dataset/list', problems => {
   store.dispatch(action.setProblemList(problems));
 });
-
-// Install the dataset list.
-store.dispatch(action.setDatasetList(data));
 
 // Install the model choices.
 select('ul.model-menu')
@@ -51,19 +45,6 @@ select('ul.model-menu')
   .on('click', d => {
     store.dispatch(action.setModelType(d));
   });
-
-// When the active dataset changes, set the dropdown menu's text to the name of
-// the dataset.
-observeStore(next => {
-  const index = next.getIn(['data', 'which']);
-  const sel = select('#navbar a.dropdown-toggle');
-  if (index === -1) {
-    sel.html('Select dataset <span class="caret"></span>');
-  } else {
-    const dataset = next.getIn(['data', 'datasets', index]);
-    sel.html(`${dataset.get('name')} <span class="caret"></span>`);
-  }
-}, s => s.getIn(['data', 'which']));
 
 // When the active data changes, populate the variables panel.
 observeStore(next => {
@@ -193,33 +174,6 @@ observeStore(next => {
       });
     });
 }, s => s.get('problems'));
-
-// When the list of datasets changes, populate the dropdown menu.
-observeStore(next => {
-  const datasets = next.getIn(['data', 'datasets']).toJS();
-  const sel = select('#navbar ul.dropdown-menu')
-    .selectAll('li')
-    .data(datasets, d => d.key || d.name);
-
-  sel.exit()
-    .remove();
-
-  sel.enter()
-    .append('li')
-    .append('a')
-    .attr('href', '#')
-    .html(d => d.name)
-    .on('click', (d, i) => {
-      store.dispatch(action.setActiveDataset(i));
-
-      const dataRaw = dataReq(`./${d.key || d.name}.csv`);
-      const data = dl.read(dataRaw, {
-        type: 'csv',
-        parse: 'auto'
-      });
-      store.dispatch(action.setActiveData(data));
-    });
-}, s => s.getIn(['data', 'datasets']));
 
 // When the list of derived log transform variables changes, update the
 // clickable state of the log transform buttons, and the list of log-variable

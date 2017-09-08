@@ -5,7 +5,6 @@
   "main": "index.js",
   "scripts": {
     "data:small": "mkdir -p data/d3m; cd data/d3m; curl -J -O https://data.kitware.com/api/v1/file/59b1717d8d777f7d33e9d061/download && tar xzvf small.tar.gz && mv small/* . && rmdir small && rm small.tar.gz",
-    "data": "sh script/genData.sh",
     "build": "webpack",
     "pythonprep": "virtualenv --no-setuptools venv && ./venv/bin/pip install -r requirements.txt",
     "rprep": "mkdir -p rlib && Rscript script/prep.R",
