@@ -187,6 +187,10 @@ observeStore(next => {
 
       select('.description')
         .html(md.render(prob.description));
+
+      json(`/dataset/data/${prob.dataFile}`, data => {
+        store.dispatch(action.setActiveData(data));
+      });
     });
 }, s => s.get('problems'));
 
