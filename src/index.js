@@ -12,7 +12,6 @@ import { action,
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
 import { allVars } from './util';
-import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
 import './index.less';
