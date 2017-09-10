@@ -10,7 +10,7 @@
     "rprep": "mkdir -p rlib && Rscript script/prep.R",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --root build --port ${PORT-8080}",
+    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --watch --root build --port ${PORT-8080}",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
