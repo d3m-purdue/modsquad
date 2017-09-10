@@ -1,7 +1,0 @@
-- name: expert-banana
-  source: expert-banana.csv
-  description: Artificial normally distributed variables (`genData.py -s 0 -c 10 -r 100`)
-
-- name: placid-yarn
-  source: placid-yarn.csv
-  description: Artificial normally and exponential distributed variables (`genData.py -s 0 -c 10 -r 100 -e 0,3,5`)

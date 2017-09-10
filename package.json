@@ -4,12 +4,13 @@
   "description": "A prototype TA3 application enabling a hypothetical modeling task",
   "main": "index.js",
   "scripts": {
-    "data": "sh script/genData.sh",
+    "data:small": "mkdir -p data/d3m; cd data/d3m; curl -J -O https://data.kitware.com/api/v1/file/59b1717d8d777f7d33e9d061/download && tar xzvf small.tar.gz && mv small/* . && rmdir small && rm small.tar.gz",
     "build": "webpack",
-    "postinstall": "virtualenv venv && ./venv/bin/pip install -r requirements.txt || Rscript script/prep.R",
+    "pythonprep": "virtualenv --no-setuptools venv && ./venv/bin/pip install -r requirements.txt",
+    "rprep": "mkdir -p rlib && Rscript script/prep.R",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "./venv/bin/tangelo --root build",
+    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --watch --root build --port ${PORT-8080}",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -46,6 +47,7 @@
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
+    "remarkable": "^1.7.1",
     "semistandard": "^11.0.0",
     "snazzy": "^7.0.0",
     "strip-json-comments-loader": "0.0.2",

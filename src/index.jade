@@ -4,50 +4,72 @@ nav.navbar.navbar-inverse
       button.navbar-toggle.collapsed(type="button" data-toggle="collapse" data-target="#navbar")
       a.navbar-brand Modeling
 
-    #navbar.collapse.navbar-collapse
-      ul.nav.navbar-nav
-        li.dropdown
-          a.dropdown-toggle(href="#" data-toggle="dropdown" role="button" aria-expanded="false")
-          ul.dropdown-menu(role="menu")
+ul.nav.nav-tabs
+  li.active: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
+  li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
+  li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
+  li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
 
-.container-fluid
-  .row
-    .col-md-3
-      .original-variables
-        h4 Original variables
-        #vars.panel-group(role="tablist" aria-multiselectable="true")
-          .panel.panel-default
+.tab-content
+  #problems.tab-pane.fade.active.in
+    .container-fluid
+      .row
+        .col-md-2
+          .problems
+            h4 Problems
+            #problems
+              span.dropdown
+                button.problems.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Select a problem
+                ul.dropdown-menu.problems
 
-    .col-md-3
-      .derived-variables
-        h4 Derived variables
-        #logvars.panel-group(role="tablist" aria-multiselectable="true")
-          .panel.panel-default
+        .col-md-6
+          h4 Problem Information
+          .description
 
-    .col-md-6
-      .exploratory-vis
-        h4 Exploratory Visualization
-        #linmodel
-          span.dropdown
-            button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            ul.dropdown-menu.variable1
+  #variables.tab-pane.fade.in
+    .container-fluid
+      .row
+        .col-md-3
+          .original-variables
+            h4 Original variables
+            #vars.panel-group(role="tablist" aria-multiselectable="true")
+              .panel.panel-default
 
-          span.dropdown
-            button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            ul.dropdown-menu.variable2
+        .col-md-3
+          .derived-variables
+            h4 Derived variables
+            #logvars.panel-group(role="tablist" aria-multiselectable="true")
+              .panel.panel-default
 
-          .vis
+  #exploratory-vis.tab-pane.fade.in
+    .container-fluid
+      .col-md-6
+        .exploratory-vis
+          h4 Bivariate Visualization
+          #linmodel
+            span.dropdown
+              button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+              ul.dropdown-menu.variable1
 
-  .row
-    .col-md-6
-      .modeling
-        h4 Modeling
-        div
-          span.dropdown
-            button.model.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
-            ul.dropdown-menu.model-menu
+            span.dropdown
+              button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+              ul.dropdown-menu.variable2
 
-        div.model-vars
+            .vis
 
-        div
-          pre.info.hidden
+  #modeling.tab-pane.fade.in
+    .container-fluid
+      .row.modeling
+        .col-md-6
+          h4 Parameters
+          div
+            span.dropdown
+              button.model.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
+              ul.dropdown-menu.model-menu
+
+          div.model-vars
+
+        .col-md-6
+          h4 Results
+          div
+            pre.info.hidden

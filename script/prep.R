@@ -1,2 +1,7 @@
+library(curl)
 library(devtools)
-devtools::install_github('d3m-purdue/d3mLm')
+library(httr)
+library(withr)
+
+options(unzip="internal")
+withr::with_libpaths(new="./rlib", code=devtools::install_github('d3m-purdue/d3mLm'))

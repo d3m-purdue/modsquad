@@ -1,8 +1,5 @@
-setDatasetList:
-  - datasets
-
-setActiveDataset:
-  - index
+setProblemList:
+  - problems
 
 setActiveData:
   - data

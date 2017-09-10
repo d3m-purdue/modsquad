@@ -4,6 +4,7 @@ import { select,
          selectAll } from 'd3-selection';
 import { json } from 'd3-request';
 import dl from 'datalib';
+import Remarkable from 'remarkable';
 
 import { action,
          store,
@@ -11,20 +12,21 @@ import { action,
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
 import { allVars } from './util';
-import data from '../data/index.yml';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
 
-// Construct a require context for the available data files.
-const dataReq = require.context('../data/csv', false, /\.csv$/);
+// Construct a markdown renderer.
+const md = new Remarkable();
 
 // Install the content template.
 select(document.body).html(body());
 
-// Install the dataset list.
-store.dispatch(action.setDatasetList(data));
+// Install the list of problems.
+json('/dataset/list', problems => {
+  store.dispatch(action.setProblemList(problems));
+});
 
 // Install the model choices.
 select('ul.model-menu')
@@ -42,19 +44,6 @@ select('ul.model-menu')
   .on('click', d => {
     store.dispatch(action.setModelType(d));
   });
-
-// When the active dataset changes, set the dropdown menu's text to the name of
-// the dataset.
-observeStore(next => {
-  const index = next.getIn(['data', 'which']);
-  const sel = select('#navbar a.dropdown-toggle');
-  if (index === -1) {
-    sel.html('Select dataset <span class="caret"></span>');
-  } else {
-    const dataset = next.getIn(['data', 'datasets', index]);
-    sel.html(`${dataset.get('name')} <span class="caret"></span>`);
-  }
-}, s => s.getIn(['data', 'which']));
 
 // When the active data changes, populate the variables panel.
 observeStore(next => {
@@ -153,32 +142,37 @@ observeStore(next => {
     });
 }, s => s.get('vars'));
 
-// When the list of datasets changes, populate the dropdown menu.
+// When the list of problems changes, populate the problems tab menu.
 observeStore(next => {
-  const datasets = next.getIn(['data', 'datasets']).toJS();
-  const sel = select('#navbar ul.dropdown-menu')
-    .selectAll('li')
-    .data(datasets, d => d.key || d.name);
+  const problems = next.get('problems').toJS();
 
-  sel.exit()
+  // Get a reference to the button.
+  const button = select('button.problems');
+
+  // Empty the menu.
+  const ul = select('ul.problems');
+  ul.selectAll('*')
     .remove();
 
-  sel.enter()
+  // Fill the menu with the problem names.
+  ul.selectAll('li')
+    .data(problems)
+    .enter()
     .append('li')
     .append('a')
     .attr('href', '#')
-    .html(d => d.name)
-    .on('click', (d, i) => {
-      store.dispatch(action.setActiveDataset(i));
+    .text(d => d.problemId)
+    .on('click', prob => {
+      button.text(prob.problemId);
 
-      const dataRaw = dataReq(`./${d.key || d.name}.csv`);
-      const data = dl.read(dataRaw, {
-        type: 'csv',
-        parse: 'auto'
+      select('.description')
+        .html(md.render(prob.description));
+
+      json(`/dataset/data/${prob.dataFile}`, data => {
+        store.dispatch(action.setActiveData(data));
       });
-      store.dispatch(action.setActiveData(data));
     });
-}, s => s.getIn(['data', 'datasets']));
+}, s => s.get('problems'));
 
 // When the list of derived log transform variables changes, update the
 // clickable state of the log transform buttons, and the list of log-variable
