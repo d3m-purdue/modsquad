@@ -4,10 +4,13 @@ stdenv.mkDerivation {
   name = "d3mEnv";
   buildInputs = [
     cairo
+    cairo.dev
     icu
+    libpng.dev
     lzma
     pcre
     readline
+    zlib.dev
 
     python27Full
     python27Packages.virtualenv
@@ -32,5 +35,8 @@ stdenv.mkDerivation {
 
     # Put readline in the LD_LIBRARY_PATH.
     export LD_LIBRARY_PATH=${readline}/lib:$LD_LIBRARY_PATH
+
+    # Augment PKG_CONFIG_PATH.
+    export PKG_CONFIG_PATH=${cairo.dev}/lib/pkgconfig:${libpng.dev}/lib/pkgconfig:${zlib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH
   '';
 }
