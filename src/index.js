@@ -9,6 +9,7 @@ import Remarkable from 'remarkable';
 import { action,
          store,
          observeStore } from './redux';
+import Dropdown from './util/Dropdown';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
 import { allVars } from './util';
@@ -29,21 +30,17 @@ json('/dataset/list', problems => {
 });
 
 // Install the model choices.
-select('ul.model-menu')
-  .selectAll('li')
-  .data([
-    'linear',
-    'quadratic',
-    'loess'
-  ])
-  .enter()
-  .append('li')
-  .append('a')
-  .attr('href', '#')
-  .text(d => d)
-  .on('click', d => {
-    store.dispatch(action.setModelType(d));
-  });
+let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
+  buttonText: 'Model',
+  onSelect: item => {
+    store.dispatch(action.setModelType(item));
+  }
+});
+modelDropdown.setItems([
+  'linear',
+  'quadratic',
+  'loess'
+]);
 
 // When the active data changes, populate the variables panel.
 observeStore(next => {
@@ -75,29 +72,24 @@ observeStore(next => {
   window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
 }, s => s.getIn(['data', 'data']));
 
+let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
+  buttonText: 'x',
+  onSelect: item => {
+    store.dispatch(action.setExploratoryVar(0, item));
+  }
+});
+let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
+  buttonText: 'y',
+  onSelect: item => {
+    store.dispatch(action.setExploratoryVar(1, item));
+  }
+});
 const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
 
-  const fillMenu = (sel, which, act) => {
-    const menu = sel.selectAll('li')
-      .data(vars);
-
-    menu.enter()
-      .append('li')
-      .append('a')
-      .attr('href', '#')
-      .text(d => d.name)
-      .on('click', d => {
-        store.dispatch(act(which, d));
-      });
-
-    menu.exit()
-      .remove();
-  };
-
   // Fill the variable menus in the exploratory vis section.
-  fillMenu(select('.variable1'), 0, action.setExploratoryVar);
-  fillMenu(select('.variable2'), 1, action.setExploratoryVar);
+  xVarDropdown.setItems(vars, d => d.name);
+  yVarDropdown.setItems(vars, d => d.name);
 };
 
 observeStore(next => {
@@ -143,35 +135,20 @@ observeStore(next => {
 }, s => s.get('vars'));
 
 // When the list of problems changes, populate the problems tab menu.
+let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
+  buttonText: 'Problem',
+  onSelect: prob => {
+    select('.description')
+      .html(md.render(prob.description));
+
+    json(`/dataset/data/${prob.dataFile}`, data => {
+      store.dispatch(action.setActiveData(data));
+    });
+  }
+});
 observeStore(next => {
   const problems = next.get('problems').toJS();
-
-  // Get a reference to the button.
-  const button = select('button.problems');
-
-  // Empty the menu.
-  const ul = select('ul.problems');
-  ul.selectAll('*')
-    .remove();
-
-  // Fill the menu with the problem names.
-  ul.selectAll('li')
-    .data(problems)
-    .enter()
-    .append('li')
-    .append('a')
-    .attr('href', '#')
-    .text(d => d.problemId)
-    .on('click', prob => {
-      button.text(prob.problemId);
-
-      select('.description')
-        .html(md.render(prob.description));
-
-      json(`/dataset/data/${prob.dataFile}`, data => {
-        store.dispatch(action.setActiveData(data));
-      });
-    });
+  problemDropdown.setItems(problems, d => d.problemId);
 }, s => s.get('problems'));
 
 // When the list of derived log transform variables changes, update the
@@ -256,7 +233,8 @@ observeStore(next => {
       y: yVar.data[i]
     }));
 
-    const el = select('#linmodel .vis');
+    const el = select('#scatterplot');
+    console.log(el);
     el.selectAll('*')
       .remove();
 
@@ -312,50 +290,28 @@ observeStore(next => {
     throw new Error(`illegal model type: ${model}`);
   }
 
-  select('button.model')
-    .text(model === null ? 'Model' : `Model: ${model}`);
-
-  select('.model-vars')
-    .selectAll('*')
+  const sel = select('.model-vars');
+  sel.selectAll('*')
     .remove();
 
-  const sel = select('.model-vars')
-    .selectAll('span.dropdown')
+  sel.selectAll('div')
     .data(buttons)
     .enter()
-    .append('span')
-    .classed('dropdown', true);
-
-  sel.append('button')
-    .classed('btn btn-default dropdown-toggle', true)
+    .append('div')
     .each(function (d) {
-      select(this)
-        .classed(d.variableName, true);
-    })
-    .attr('data-toggle', 'dropdown')
-    .text(d => d.displayName[0].toUpperCase() + d.displayName.slice(1));
-
-  sel.append('ul')
-    .classed('dropdown-menu', true)
-    .each(function (d) {
-      select(this)
-        .classed(`${d.displayName}-menu`, true);
-    })
-    .selectAll('li')
-    .data(d => {
       const vars = allVars();
-      return vars.map(v => Object.assign({}, v, {
+
+      let dropdown = new Dropdown(this, {
+        buttonText: d.displayName[0].toUpperCase() + d.displayName.slice(1),
+        onSelect: item => {
+          store.dispatch(action.setModelingVar(item.variableName, item));
+        }
+      });
+
+      dropdown.setItems(vars.map(v => Object.assign({}, v, {
         variableName: d.variableName,
         displayName: d.displayName
-      }));
-    })
-    .enter()
-    .append('li')
-    .append('a')
-    .attr('href', '#')
-    .text(d => d.name)
-    .on('click', d => {
-      store.dispatch(action.setModelingVar(d.variableName, d));
+      })), d => d.name);
     });
 
   window.setTimeout(() => store.dispatch(action.setModelInputVars(null)), 0);
