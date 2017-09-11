@@ -1,15 +1,18 @@
 .container-fluid
-  .row.modeling
-    .col-md-6
-      h4 Parameters
-      div
-        span.dropdown
-          button.model.btn.btn-default.dropdown-toggle(data-toggle="dropdown") Model
-          ul.dropdown-menu.model-menu
+  .modeling
+    .row
+      .col-md-6
+        h4 Parameters
+        .container-fluid
+          .row
+            .col-md-12
+              #modeldropdown
 
-      div.model-vars
+          .row
+            .col-md-12
+              .model-vars.btn-group
 
-    .col-md-6
-      h4 Results
-      div
-        pre.info.hidden
+      .col-md-6
+        h4 Results
+        div
+          pre.info.hidden

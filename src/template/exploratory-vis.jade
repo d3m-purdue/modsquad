@@ -1,14 +1,20 @@
 .container-fluid
-  .col-md-6
-    .exploratory-vis
-      h4 Bivariate Visualization
-      #linmodel
-        span.dropdown
-          button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-          ul.dropdown-menu.variable1
+  .exploratory-vis
+    .row
+      .col-md-6
+        h4 Bivariate Visualization
+        .btn-group
+          #x-dropdown
+          #y-dropdown
 
-        span.dropdown
-          button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-          ul.dropdown-menu.variable2
+          //-span.dropdown
+            //-button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+            //-ul.dropdown-menu.variable1
 
-        .vis
+          //-span.dropdown
+            //-button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
+            //-ul.dropdown-menu.variable2
+
+    .row
+      .col-md-6
+        #scatterplot
