@@ -42,6 +42,15 @@ modelDropdown.setItems([
   'loess'
 ]);
 
+// Install the TA2 options.
+let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
+  buttonText: 'TA2',
+  onSelect: item => {
+    console.log(item);
+  }
+});
+ta2Dropdown.setItems(models, d => d.display);
+
 // When the active data changes, populate the variables panel.
 observeStore(next => {
   const immData = next.getIn(['data', 'data']);

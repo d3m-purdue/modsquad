@@ -8,6 +8,7 @@ ul.nav.nav-tabs
   li.active: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
+  li: a(href="#ta2" data-toggle="tab" aria-expanded="true") TA2
   li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
 
 .tab-content
@@ -19,6 +20,9 @@ ul.nav.nav-tabs
 
   #exploratory-vis.tab-pane.fade.in
     include template/exploratory-vis.jade
+
+  #ta2.tab-pane.fade.in
+    include template/ta2.jade
 
   #modeling.tab-pane.fade.in
     include template/modeling.jade
