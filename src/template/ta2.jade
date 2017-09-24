@@ -1,17 +1,21 @@
 .container-fluid
   .row
-    .col-md-3
+    .col-md-12
       h4 TA2 Models
       .container-fluid
         .row
           .col-md-12
-            .ta2-models
+            .btn-toolbar
+              .ta2-models
 
-        .row
-          .col-md-12
-            .ta2-vars.btn-group
-              .ta2-predictor
-              .ta2-response
+              .btn-group.ta2-params.hidden
+                .ta2-predictor
+                .ta2-response
 
-      #models.panel-group(role="tablist" aria-multiselectable="true")
+              button.btn.btn-default.train(disabled="disabled").hidden.disabled Train
+
+  .row
+    .col-md-12
+      h4 Pipelines
+      .pipelines.panel-group(role="tablist" aria-multiselectable="true")
         .panel.panel-default

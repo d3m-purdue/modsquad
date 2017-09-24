@@ -16,6 +16,13 @@ const initial = Immutable.fromJS({
   modeling: {
     model: null,
     inputVars: null
+  },
+  ta2: {
+    model: null,
+    inputs: {
+      predictor: null,
+      response: null
+    }
   }
 });
 
@@ -80,6 +87,18 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.setModelingVar:
       newState = state.setIn(['modeling', 'inputVars', action.which], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Model:
+      newState = state.setIn(['ta2', 'model'], Immutable.fromJS(action.model));
+      break;
+
+    case actionType.setTA2Predictor:
+      newState = state.setIn(['ta2', 'inputs', 'predictor'], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Response:
+      newState = state.setIn(['ta2', 'inputs', 'response'], Immutable.fromJS(action.var));
       break;
   }
 
