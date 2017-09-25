@@ -3,6 +3,16 @@
     .row
       .col-md-6
         h4 Bivariate Visualization
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | This panel of the interface is to explore if two features in the 
+          | problem dataset are related to each other.  Please select two features
+          | to display along the X and Y axes.  All the points in the problem dataset
+          | will be plotted in the chart.  
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | If the points appear to be randomly arranged, these two features are
+          | not strongly correlated.  If the points are arranged in a "fan out"
+          | arrangement pointing up and right, the features are correlated because
+          | their respective values exhibit a similar trend. 
         .btn-group
           #x-dropdown
           #y-dropdown

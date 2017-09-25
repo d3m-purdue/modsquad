@@ -12,11 +12,15 @@ import { action,
 import Dropdown from './util/Dropdown';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
+import { HistogramPlot } from './util/stats';
 import { allVars } from './util';
 import varTemplate from './template/var.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
+
+// easy way to rescale the embedded plot dimensions, while preserving aspect ratio
+const plotSizeScale = 2.5 
 
 // Construct a markdown renderer.
 const md = new Remarkable();
@@ -31,7 +35,7 @@ json('/dataset/list', problems => {
 
 // Install the model choices.
 let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
-  buttonText: 'Model',
+  buttonText: 'Select Model',
   onSelect: item => {
     store.dispatch(action.setModelType(item));
   }
@@ -116,13 +120,24 @@ observeStore(next => {
   panels.select('.panel-body')
     .select('.vis')
     .each(function (d) {
-      const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+      const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300,
-        height: 200
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
       });
       vis.render();
+      // add second plot
+      var el = document.createElement('div')
+      this.appendChild(el)
+      const vis2 = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+        data: d.data,
+        opacity: 0.9,
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
+      });
+      vis2.render();
+
     });
 
   panels.select('.log')
@@ -136,7 +151,7 @@ observeStore(next => {
 
 // When the list of problems changes, populate the problems tab menu.
 let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
-  buttonText: 'Problem',
+  buttonText: 'Select a Problem',
   onSelect: prob => {
     select('.description')
       .html(md.render(prob.description));
@@ -193,13 +208,23 @@ observeStore(next => {
     .select('.panel-body')
     .select('.vis')
     .each(function (d) {
-      const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+      var el = document.createElement('div')
+      this.appendChild(el)
+      const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300,
-        height: 200
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
       });
       vis.render();
+      // add second plot
+      const vis2 = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+        data: d.data,
+        opacity: 0.9,
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
+      });
+      vis2.render();
     });
 }, s => s.get('logVars'));
 
@@ -243,8 +268,8 @@ observeStore(next => {
       x: 'x',
       y: 'y',
       opacity: 0.9,
-      width: 600,
-      height: 600
+      width: 600*plotSizeScale,
+      height: 600*plotSizeScale
     });
     vis.render();
   }

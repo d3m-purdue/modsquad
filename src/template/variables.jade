@@ -1,13 +1,23 @@
 .container-fluid
   .row
-    .col-md-3
+    .col-md-6
       .original-variables
-        h4 Original variables
+        h4 Original features
+        p(style="margin-top:50; gargin-left:20; margin-right:60")  
+          | Each feature found in the 
+          | source dataset is listed below.  
+          | To explore a feature, click the feature name to toggle exploratory 
+          | charts showing the values the feature takes on across the records 
+          | in the dataset.
+
         #vars.panel-group(role="tablist" aria-multiselectable="true")
           .panel.panel-default
 
-    .col-md-3
+    .col-md-6
       .derived-variables
-        h4 Derived variables
+        h4 Derived features
+        p(style="margin-top:30; gargin-left:20; margin-right:40")  
+         | Below is a list of additional features you have defined.  These
+         | features can be used by any futher exploration or analysis performed on the dataset.  
         #logvars.panel-group(role="tablist" aria-multiselectable="true")
           .panel.panel-default
