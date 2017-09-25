@@ -49,9 +49,9 @@ let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
     selectAll('.ta2-params,.train')
       .classed('hidden', false);
 
-    json(`/session/${item.port}`)
-      .post({}, resp => {
-        store.dispatch(action.setTA2Session(resp.context.sessionId));
+    json(`/session?port=${item.port}`)
+      .post({}, session => {
+        store.dispatch(action.setTA2Session(session));
       });
 
     store.dispatch(action.setTA2Model(item));
@@ -75,22 +75,32 @@ let ta2Response = new Dropdown(select('.ta2-response').node(), {
 
 // Install action for train button.
 select('button.train').on('click', () => {
-  const model = store.getState().get('ta2');
-  const ta2 = model.get('model').toJS();
-  const predictor = model.getIn(['inputs', 'predictor', 'name']);
-  const response = model.getIn(['inputs', 'response', 'name']);
+  const ta2 = store.getState().get('ta2');
+  const session = JSON.stringify(ta2.get('session').toJS().context);
+  const model = ta2.get('model');
+  const port = model.get('port');
+  const predictor = ta2.getIn(['inputs', 'predictor', 'name']);
+  const response = ta2.getIn(['inputs', 'response', 'name']);
   const data = store.getState().getIn(['data', 'file']);
 
   // TODO - gather up the variables, make a call to the appropriate endpoint.
-  json('/pipeline')
-    .post({
-      session: 'session!',
-      data,
-      predictor,
-      response
-    }, resp => {
-      console.log(resp);
-    });
+  const params = {
+    port,
+    session,
+    data,
+    predictor,
+    response
+  };
+  let query = [];
+  for (let x in params) {
+    if (params.hasOwnProperty(x)) {
+      query.push(`${x}=${params[x]}`);
+    }
+  }
+  const url = `/pipeline?${query.join('&')}`;
+  json(url).post({}, resp => {
+    console.log(resp);
+  });
 });
 
 // When the active data changes, populate the variables panel.
