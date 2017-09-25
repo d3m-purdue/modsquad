@@ -8,6 +8,7 @@
     "build": "webpack",
     "pythonprep": "virtualenv --no-setuptools venv && ./venv/bin/pip install -r requirements.txt",
     "rprep": "mkdir -p rlib && Rscript script/prep.R",
+    "protobuf": "./venv/bin/python -m grpc_tools.protoc -I proto --python_out=src/tangelo --grpc_python_out=src/tangelo core.proto",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
     "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --watch --root build --port ${PORT-8080}",

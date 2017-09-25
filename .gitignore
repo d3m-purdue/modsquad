@@ -6,3 +6,5 @@ build
 rlib
 venv
 data/csv
+src/tangelo/core_pb2.py
+src/tangelo/core_pb2_grpc.py

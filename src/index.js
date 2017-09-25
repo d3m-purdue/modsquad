@@ -49,11 +49,9 @@ let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
     selectAll('.ta2-params,.train')
       .classed('hidden', false);
 
-    json('/session')
-      .post({
-        user_agent: 'modsquad'
-      }, resp => {
-        console.log(resp);
+    json(`/session/${item.port}`)
+      .post({}, resp => {
+        store.dispatch(action.setTA2Session(resp.context.sessionId));
       });
 
     store.dispatch(action.setTA2Model(item));

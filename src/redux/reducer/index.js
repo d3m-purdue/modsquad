@@ -23,7 +23,8 @@ const initial = Immutable.fromJS({
     inputs: {
       predictor: null,
       response: null
-    }
+    },
+    sessionId: null
   }
 });
 
@@ -103,6 +104,10 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.setTA2Response:
       newState = state.setIn(['ta2', 'inputs', 'response'], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Session:
+      newState = state.setIn(['ta2', 'sessionId'], action.sessionId);
       break;
   }
 

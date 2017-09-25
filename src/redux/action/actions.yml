@@ -34,3 +34,6 @@ setTA2Predictor:
 
 setTA2Response:
   - var
+
+setTA2Session:
+  - sessionId
