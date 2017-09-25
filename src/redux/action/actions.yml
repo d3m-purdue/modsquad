@@ -3,6 +3,7 @@ setProblemList:
 
 setActiveData:
   - data
+  - file
 
 setVariables:
   - variables

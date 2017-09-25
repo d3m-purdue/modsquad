@@ -74,7 +74,9 @@ module.exports = candelaLoaders({
     }),
     new CopyWebpackPlugin([
       { from: 'src/tangelo/d3mLm.py', to: 'd3mLm.py' },
-      { from: 'src/tangelo/dataset.py', to: 'dataset.py' }
+      { from: 'src/tangelo/dataset.py', to: 'dataset.py' },
+      { from: 'src/tangelo/pipeline.py', to: 'pipeline.py' },
+      { from: 'src/tangelo/session.py', to: 'session.py' }
     ])
   ]
 });
