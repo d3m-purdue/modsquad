@@ -37,3 +37,9 @@ setTA2Response:
 
 setTA2Session:
   - sessionId
+
+addPipeline:
+  - id
+  - resultURI
+  - score
+  - response

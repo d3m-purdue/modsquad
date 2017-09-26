@@ -24,7 +24,8 @@ const initial = Immutable.fromJS({
       predictor: null,
       response: null
     },
-    session: null
+    session: null,
+    pipelines: []
   }
 });
 
@@ -108,6 +109,19 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.setTA2Session:
       newState = state.setIn(['ta2', 'session'], Immutable.fromJS(action.sessionId));
+      break;
+
+    case actionType.addPipeline:
+      // Only add the new pipeline if it's not already in the pipelines list.
+      const found = state.getIn(['ta2', 'pipelines']).findIndex(p => p.get('id') === action.id);
+      if (found === -1) {
+        newState = state.updateIn(['ta2', 'pipelines'], pipelines => pipelines.push(Immutable.fromJS({
+          id: action.id,
+          response: action.response,
+          resultURI: action.resultURI,
+          score: action.score
+        })));
+      }
       break;
   }
 
