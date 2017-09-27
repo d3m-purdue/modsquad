@@ -1,5 +1,6 @@
 import 'bootstrap/dist/js/bootstrap';
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
+import ScatterPlotMatrix from 'candela/plugins/vega/ScatterPlotMatrix';
 import { select,
          selectAll } from 'd3-selection';
 import { json } from 'd3-request';
@@ -88,13 +89,43 @@ let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
     store.dispatch(action.setExploratoryVar(1, item));
   }
 });
+
+// Added for the scatterplot matrix
+let f1VarDropdown = new Dropdown(select('#explore-f1-dropdown').node(), {
+  buttonText: 'feature 1',
+  onSelect: item => {
+    store.dispatch(action.setExploratoryVarMatrix(0, item));
+  }
+});
+let f2VarDropdown = new Dropdown(select('#explore-f2-dropdown').node(), {
+  buttonText: 'feature 2',
+  onSelect: item => {
+    store.dispatch(action.setExploratoryVarMatrix(1, item));
+  }
+});
+let f3VarDropdown = new Dropdown(select('#explore-f3-dropdown').node(), {
+  buttonText: 'feature 3',
+  onSelect: item => {
+    store.dispatch(action.setExploratoryVarMatrix(2, item));
+  }
+});
+
+
 const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
 
   // Fill the variable menus in the exploratory vis section.
   xVarDropdown.setItems(vars, d => d.name);
   yVarDropdown.setItems(vars, d => d.name);
+
+  // Fill the variable menus in the exploratory vis scatterplot section.
+  f1VarDropdown.setItems(vars, d => d.name);
+  f2VarDropdown.setItems(vars, d => d.name);
+  f3VarDropdown.setItems(vars, d => d.name);
 };
+
+// routine to initialize the variable dropdowns with their own vis 
+// panels built into each button
 
 observeStore(next => {
   const vars = next.get('vars').toJS();
@@ -273,7 +304,60 @@ observeStore(next => {
     });
     vis.render();
   }
+
 }, s => s.get('exploratoryVis'));
+
+
+
+// When the exploratory vis matrix variables change, update the menus.
+observeStore(next => {
+  const exploratoryVisMatrix = next.get('exploratoryVisMatrix');
+
+  // Collect the variable data.
+  const get = key => {
+    let x = exploratoryVisMatrix.get(key);
+    if (x !== null) {
+      x = x.toJS();
+    }
+    return x;
+  };
+  const f1Var = get('f1Var');
+  const f2Var = get('f2Var');
+  const f3Var = get('f3Var');
+
+  // Set the text on the dropdown menus.
+  const setName = (which, label, v) => {
+    select(which)
+      .text(v ? `${label}: ${v.name}` : label);
+  };
+  setName('button.var1', 'feature1', f1Var);
+  setName('button.var2', 'feature2', f2Var);
+  setName('button.var3', 'feature3', f3Var);
+
+  // If both variables are selected, display a scatterplot of them.
+  if (f1Var && f2Var && f3Var) {
+    const data = f1Var.data.map((d, i) => ({
+      feature1: d,
+      feature2: f2Var.data[i],
+      feature3: f3Var.data[i],
+      name: d 
+    }));
+
+    const elmatrix = select('#scatterplotmatrix');
+    console.log(elmatrix);
+    elmatrix.selectAll('*')
+      .remove();
+
+    const vismatrix = new ScatterPlotMatrix(elmatrix.node(), { // eslint-disable-line no-unused-vars
+      data,
+      fields: ['feature1','feature2','feature3'],
+      width: 600*2*plotSizeScale,
+      height: 600*2*plotSizeScale
+    });
+    vismatrix.render();
+  }
+
+}, s => s.get('exploratoryVisMatrix'));
 
 // When the model changes, update the input variables.
 observeStore(next => {

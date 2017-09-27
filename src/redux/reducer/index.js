@@ -13,6 +13,11 @@ const initial = Immutable.fromJS({
     xVar: null,
     yVar: null
   },
+  exploratoryVisMatrix: {
+    f1Var: null,
+    f2Var: null,
+    f3Var: null
+  },
   modeling: {
     model: null,
     inputVars: null
@@ -51,6 +56,18 @@ const reducer = (state = initial, action = {}) => {
         newState = state.setIn(['exploratoryVis', 'xVar'], Immutable.fromJS(action.var));
       } else if (action.which === 1) {
         newState = state.setIn(['exploratoryVis', 'yVar'], Immutable.fromJS(action.var));
+      } else {
+        throw new Error(`illegal action.which: ${action.which}`);
+      }
+      break;
+
+    case actionType.setExploratoryVarMatrix:
+      if (action.which === 0) {
+        newState = state.setIn(['exploratoryVisMatrix', 'f1Var'], Immutable.fromJS(action.var));
+      } else if (action.which === 1) {
+        newState = state.setIn(['exploratoryVisMatrix', 'f2Var'], Immutable.fromJS(action.var));
+      } else if (action.which === 2) {
+        newState = state.setIn(['exploratoryVisMatrix', 'f3Var'], Immutable.fromJS(action.var));
       } else {
         throw new Error(`illegal action.which: ${action.which}`);
       }
