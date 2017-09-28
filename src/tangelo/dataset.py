@@ -37,6 +37,7 @@ def listDatasets():
 
         problems.append({'problemId': schema['problemId'],
                          'description': description,
+                         'metadata': schema,
                          'dataFile': '%s' % (os.path.basename(dirpath))})
 
     return problems

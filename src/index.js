@@ -15,6 +15,7 @@ import { NormalPlot } from './util/stats';
 import { allVars } from './util';
 import varTemplate from './template/var.jade';
 import pipelineTemplate from './template/pipeline.jade';
+import metadataTemplate from './template/metadata.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
@@ -206,6 +207,11 @@ let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
   onSelect: prob => {
     select('.description')
       .html(md.render(prob.description));
+
+    select('.metadata')
+      .append(d => stringToElement(metadataTemplate({
+        metadata: prob.metadata
+      })));
 
     json(`/dataset/data/${prob.dataFile}`, data => {
       store.dispatch(action.setActiveData(data.data, data.file));
