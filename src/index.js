@@ -176,7 +176,7 @@ observeStore(next => {
     .enter()
     .append(d => stringToElement(varTemplate({
       name: d.name,
-      button: true
+      button: false
     })));
 
   panels.select('.panel-body')
