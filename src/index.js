@@ -478,22 +478,6 @@ observeStore(next => {
       console.log('predict', d);
     });
 
-  panels.select('.input')
-    .each(function () {
-      let dropdown = new Dropdown(this, {
-        buttonText: 'Feature',
-        onSelect: item => {
-          // Enable the predict button.
-          predict.attr('disabled', null)
-            .classed('disabled', false);
-
-          console.log(item);
-        }
-      });
-
-      dropdown.setItems(allVars(), d => d.name);
-    });
-
   panels.select('.export')
     .on('click', d => {
       console.log('export', d);
