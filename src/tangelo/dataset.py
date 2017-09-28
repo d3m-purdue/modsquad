@@ -1,5 +1,4 @@
 import csv
-import gzip
 import json
 import os
 import tangelo
@@ -56,17 +55,13 @@ def promote(value):
 
 
 def getDataset(name):
-    datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv.gz'))
+    datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv'))
 
     try:
-        reader = csv.reader(gzip.GzipFile(datafile))
+        reader = csv.reader(open(datafile))
     except IOError:
-        try:
-            datafile = datafile[0:-3]
-            reader = csv.reader(open(datafile))
-        except IOError:
-            tangelo.http_status(500)
-            return {'error': 'Could not open datafile for dataset %s' % (name)}
+        tangelo.http_status(500)
+        return {'error': 'Could not open datafile for dataset %s' % (name)}
 
     rows = list(reader)
 
