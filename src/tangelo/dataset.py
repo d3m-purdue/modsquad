@@ -37,6 +37,7 @@ def listDatasets():
 
         problems.append({'problemId': schema['problemId'],
                          'description': description,
+                         'metadata': schema,
                          'dataFile': '%s' % (os.path.basename(dirpath))})
 
     return problems
@@ -73,4 +74,5 @@ def getDataset(name):
     for row in rows[1:]:
         dicts.append({k: promote(v) for k, v in zip(rows[0], row)})
 
-    return dicts
+    return {'data': dicts,
+            'file': datafile}

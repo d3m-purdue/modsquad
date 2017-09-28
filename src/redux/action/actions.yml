@@ -3,6 +3,7 @@ setProblemList:
 
 setActiveData:
   - data
+  - file
 
 setVariables:
   - variables
@@ -24,3 +25,21 @@ setModelInputVars:
 setModelingVar:
   - which
   - var
+
+setTA2Model:
+  - model
+
+setTA2Predictor:
+  - var
+
+setTA2Response:
+  - var
+
+setTA2Session:
+  - sessionId
+
+addPipeline:
+  - id
+  - resultURI
+  - score
+  - response

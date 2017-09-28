@@ -4,7 +4,8 @@ import { actionType } from '../action';
 
 const initial = Immutable.fromJS({
   data: {
-    data: null
+    data: null,
+    file: null
   },
   problems: [],
   vars: [],
@@ -16,6 +17,15 @@ const initial = Immutable.fromJS({
   modeling: {
     model: null,
     inputVars: null
+  },
+  ta2: {
+    model: null,
+    inputs: {
+      predictor: null,
+      response: null
+    },
+    session: null,
+    pipelines: []
   }
 });
 
@@ -32,7 +42,10 @@ const reducer = (state = initial, action = {}) => {
       break;
 
     case actionType.setActiveData:
-      newState = state.setIn(['data', 'data'], Immutable.fromJS(action.data));
+      newState = state.withMutations(s => {
+        s.setIn(['data', 'data'], Immutable.fromJS(action.data));
+        s.setIn(['data', 'file'], action.file);
+      });
       break;
 
     case actionType.setVariables:
@@ -80,6 +93,35 @@ const reducer = (state = initial, action = {}) => {
 
     case actionType.setModelingVar:
       newState = state.setIn(['modeling', 'inputVars', action.which], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Model:
+      newState = state.setIn(['ta2', 'model'], Immutable.fromJS(action.model));
+      break;
+
+    case actionType.setTA2Predictor:
+      newState = state.setIn(['ta2', 'inputs', 'predictor'], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Response:
+      newState = state.setIn(['ta2', 'inputs', 'response'], Immutable.fromJS(action.var));
+      break;
+
+    case actionType.setTA2Session:
+      newState = state.setIn(['ta2', 'session'], Immutable.fromJS(action.sessionId));
+      break;
+
+    case actionType.addPipeline:
+      // Only add the new pipeline if it's not already in the pipelines list.
+      const found = state.getIn(['ta2', 'pipelines']).findIndex(p => p.get('id') === action.id);
+      if (found === -1) {
+        newState = state.updateIn(['ta2', 'pipelines'], pipelines => pipelines.push(Immutable.fromJS({
+          id: action.id,
+          response: action.response,
+          resultURI: action.resultURI,
+          score: action.score
+        })));
+      }
       break;
   }
 

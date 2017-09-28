@@ -1,0 +1,18 @@
+.panel.panel-default
+  .panel-heading(id=`p-${name}-h` role="tab")
+    h4.panel-title
+      a(role="button" data-toggle="collapse" data-parent="#pipelines" href=`#p-${name}-c` aria-expanded="true" aria-controls=`p-${name}-c`) #{name}
+  .panel-collapse.collapse(id=`p-${name}-c` role="tabpanel" aira-labelledby=`p-${name}-h`)
+    .panel-body
+      .container-fluid
+        .row
+          .col-md-12
+            h4 Score
+            span #[span.strong.score-type]: #[span.score]
+        .row
+          .col-md-12
+            h4 Execute
+            .btn-toolbar
+              .input
+              button.btn.btn-default.predict(disabled='disabled').disabled Predict
+              button.btn.btn-success.export Export
