@@ -1,0 +1,54 @@
+
+Recipe for building the TA3 demo on Ubuntu 16.04:
+
+sudo sh -c 'echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list’
+gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
+gpg -a --export E084DAB9 | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y r-base
+sudo apt-get install libssl-dev
+sudo apt-get install openssl
+sudo apt-get install libcurl4-openssl-dev
+
+sudo R
+> install.packages(“devtools”)
+> library(devtools)
+> install_github("d3m-purdue/d3mLm")
+
+sudo apt-get install virtualenv
+sudo apt-get install python-pip
+
+sudo apt-get install npm
+# update the npm version
+sudo npm install -g npm
+
+# install nodejs
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
+sudo apt-get install -y nodes
+
+# install dependencies for the app
+sudo apt-get install libcairo2-dev libjpeg-dev libgif-dev
+
+# install the application
+npm install
+npm run data
+
+git clone https://github.com/d3m-purdue/d3m-ta3-modeling.git
+cd d3m-ta3-modeling
+git checkout tab-interface
+
+# install tangelo services
+virtualenv env
+source venv/bin/activate
+(venv) pip install rpy2==2.8.6
+pip install tangelo==0.10.0
+
+npm run data:small
+
+# had to comment out line 15 of src/index.js - missing data/index.yml file (outdated command in package.json?)
+npm run build
+npm run serve
+
+# note: when run on the Amazon instance, everything except the d3mLm model runs, though I have had the models work before. 
+
+
