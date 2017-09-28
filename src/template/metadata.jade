@@ -1,0 +1,13 @@
+- var stripQuotes = (s) => s && s[0] === '"' && s[s.length - 1] === '"' ? s.slice(1, -1) : s;
+
+table.table.table-striped
+  thead
+    tr
+      th Property
+      th Value
+  tbody
+    each val, key in metadata
+      unless ['redacted', 'descriptionFile', 'problemSchemaVersion', 'problemId', 'datasets'].indexOf(key) > -1
+        tr
+          td= key
+          td= stripQuotes(JSON.stringify(val))
