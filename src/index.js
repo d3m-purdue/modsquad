@@ -14,6 +14,7 @@ import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
 import { allVars } from './util';
 import varTemplate from './template/var.jade';
+import pipelineTemplate from './template/pipeline.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
@@ -454,3 +455,47 @@ observeStore(next => {
     .attr('disabled', null)
     .classed('disabled', false);
 }, s => s.getIn(['ta2', 'inputs']));
+
+observeStore(next => {
+  const pipelines = next.getIn(['ta2', 'pipelines']).toJS();
+
+  let panels = select('#pipelines .panel')
+    .selectAll('.panel')
+    .data(pipelines)
+    .enter()
+    .append(d => stringToElement(pipelineTemplate({
+      name: d.id
+    })));
+
+  const predict = panels.select('.predict')
+    .on('click', d => {
+      console.log('predict', d);
+    });
+
+  panels.select('.input')
+    .each(function () {
+      let dropdown = new Dropdown(this, {
+        buttonText: 'Feature',
+        onSelect: item => {
+          // Enable the predict button.
+          predict.attr('disabled', null)
+            .classed('disabled', false);
+
+          console.log(item);
+        }
+      });
+
+      dropdown.setItems(allVars(), d => d.name);
+    });
+
+  panels.select('.export')
+    .on('click', d => {
+      console.log('export', d);
+    });
+
+  panels.select('.score-type')
+    .html(d => d.score.metric);
+
+  panels.select('.score')
+    .html(d => d.score.value);
+}, s => s.getIn(['ta2', 'pipelines']));
