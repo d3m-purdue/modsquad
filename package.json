@@ -11,7 +11,7 @@
     "protobuf": "./venv/bin/python -m grpc_tools.protoc -I proto --python_out=src/tangelo --grpc_python_out=src/tangelo core.proto",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --watch --root build --port ${PORT-8080}",
+    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --root build --port ${PORT-8080}",
     "serve_d3m": "sudo nohup ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-80} &",
     "kill_d3m": "sudo pkill -f tangelo",
     "test": "echo \"Error: no test specified\" && exit 1"
