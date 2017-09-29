@@ -74,7 +74,7 @@ select('button.train').on('click', () => {
     .map(f => f.varName);
   const response = store.getState().getIn(['data', 'meta', 'trainData', 'trainTargets'])
     .toJS()
-    .filter(f => f.varRole === 'attribute')
+    .filter(f => f.varRole === 'target')
     // .filter(f => f.varType === 'integer' || f.varType === 'float')
     .map(f => f.varName);
   const data = store.getState().getIn(['data', 'path']);
