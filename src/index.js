@@ -74,7 +74,7 @@ select('button.train').on('click', () => {
     .map(f => f.varName);
   const response = store.getState().getIn(['data', 'meta', 'trainData', 'trainTargets'])
     .toJS()
-    .filter(f => f.varRole === 'attribute')
+    .filter(f => f.varRole === 'target')
     // .filter(f => f.varType === 'integer' || f.varType === 'float')
     .map(f => f.varName);
   const data = store.getState().getIn(['data', 'path']);
@@ -95,6 +95,8 @@ select('button.train').on('click', () => {
   }
   const url = `/pipeline?${query.join('&')}`;
   json(url).post({}, resp => {
+    resp = resp.filter(x => x.pipelineInfo)[0];
+
     store.dispatch(action.addPipeline(resp.pipelineId, resp.pipelineInfo.predictResultUris[0], resp.pipelineInfo.scores[0], response));
   });
 });
@@ -452,12 +454,60 @@ observeStore(next => {
 
   const predict = panels.select('.predict')
     .on('click', d => {
-      console.log('predict', d);
+      const ta2 = store.getState().get('ta2');
+      const session = JSON.stringify(ta2.get('session').toJS().context);
+      const model = ta2.get('model');
+      const port = model.get('port');
+      const predictor = store.getState().getIn(['data', 'meta', 'trainData', 'trainData'])
+        .toJS()
+        .filter(f => f.varRole === 'attribute')
+        .filter(f => f.varType === 'integer' || f.varType === 'float')
+        .map(f => f.varName);
+      const data = store.getState().getIn(['data', 'path']);
+
+      const params = {
+        port,
+        session,
+        pipeline: d.id,
+        data,
+        predictor: JSON.stringify(predictor)
+      };
+
+      let query = [];
+      for (let x in params) {
+        if (params.hasOwnProperty(x)) {
+          query.push(`${x}=${params[x]}`);
+        }
+      }
+      const url = `/pipeline/execute?${query.join('&')}`;
+      json(url).post({}, resp => {
+        console.log(resp);
+      });
     });
 
   panels.select('.export')
     .on('click', d => {
-      console.log('export', d);
+      const ta2 = store.getState().get('ta2');
+      const session = JSON.stringify(ta2.get('session').toJS().context);
+      const model = ta2.get('model');
+      const port = model.get('port');
+
+      const params = {
+        port,
+        session,
+        pipeline: d.id,
+      };
+
+      let query = [];
+      for (let x in params) {
+        if (params.hasOwnProperty(x)) {
+          query.push(`${x}=${params[x]}`);
+        }
+      }
+      const url = `/pipeline/export?${query.join('&')}`;
+      json(url).post({}, resp => {
+        console.log(resp);
+      });
     });
 
   panels.select('.score-type')
