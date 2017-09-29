@@ -3,7 +3,9 @@ setProblemList:
 
 setActiveData:
   - data
-  - file
+  - name
+  - path
+  - meta
 
 setVariables:
   - variables

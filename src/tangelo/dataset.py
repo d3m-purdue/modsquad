@@ -55,7 +55,9 @@ def promote(value):
 
 
 def getDataset(name):
-    datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv'))
+    datapath = os.path.abspath(os.path.join('../data/d3m', name, 'data'))
+
+    datafile = os.path.join(datapath, 'trainData.csv')
 
     try:
         reader = csv.reader(open(datafile))
@@ -69,5 +71,20 @@ def getDataset(name):
     for row in rows[1:]:
         dicts.append({k: promote(v) for k, v in zip(rows[0], row)})
 
+    schemaFile = os.path.join(datapath, 'dataSchema.json')
+
+    schema = None
+    try:
+        with open(schemaFile) as f:
+            schema = json.loads(f.read())
+    except IOError:
+        tangelo.http_status(500)
+        return {'error': 'Could not open schemafile for dataset %s' % (name)}
+    except ValueError as e:
+        tangelo.http_status(500)
+        return {'error': 'Error while parsing schemafile for dataset %s: %s' % (name, e)}
+
     return {'data': dicts,
-            'file': datafile}
+            'meta': schema,
+            'path': datapath,
+            'name': name}

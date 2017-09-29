@@ -5,7 +5,9 @@ import { actionType } from '../action';
 const initial = Immutable.fromJS({
   data: {
     data: null,
-    file: null
+    name: null,
+    path: null,
+    meta: null
   },
   problems: [],
   vars: [],
@@ -44,7 +46,9 @@ const reducer = (state = initial, action = {}) => {
     case actionType.setActiveData:
       newState = state.withMutations(s => {
         s.setIn(['data', 'data'], Immutable.fromJS(action.data));
-        s.setIn(['data', 'file'], action.file);
+        s.setIn(['data', 'name'], action.file);
+        s.setIn(['data', 'path'], action.path);
+        s.setIn(['data', 'meta'], Immutable.fromJS(action.meta));
       });
       break;
 

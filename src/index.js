@@ -61,37 +61,31 @@ let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
 });
 ta2Dropdown.setItems(models, d => d.display);
 
-// Install menus for the TA2 model parameters.
-let ta2Predictor = new Dropdown(select('.ta2-predictor').node(), {
-  buttonText: 'Predictor',
-  onSelect: item => {
-    store.dispatch(action.setTA2Predictor(item));
-  }
-});
-let ta2Response = new Dropdown(select('.ta2-response').node(), {
-  buttonText: 'Response',
-  onSelect: item => {
-    store.dispatch(action.setTA2Response(item));
-  }
-});
-
 // Install action for train button.
 select('button.train').on('click', () => {
   const ta2 = store.getState().get('ta2');
   const session = JSON.stringify(ta2.get('session').toJS().context);
   const model = ta2.get('model');
   const port = model.get('port');
-  const predictor = ta2.getIn(['inputs', 'predictor', 'name']);
-  const response = ta2.getIn(['inputs', 'response', 'name']);
-  const data = store.getState().getIn(['data', 'file']);
+  const predictor = store.getState().getIn(['data', 'meta', 'trainData', 'trainData'])
+    .toJS()
+    .filter(f => f.varRole === 'attribute')
+    // .filter(f => f.varType === 'integer' || f.varType === 'float')
+    .map(f => f.varName);
+  const response = store.getState().getIn(['data', 'meta', 'trainData', 'trainTargets'])
+    .toJS()
+    .filter(f => f.varRole === 'attribute')
+    // .filter(f => f.varType === 'integer' || f.varType === 'float')
+    .map(f => f.varName);
+  const data = store.getState().getIn(['data', 'path']);
 
-  // TODO - gather up the variables, make a call to the appropriate endpoint.
+  // Gather the parameters needed for a CreatePipelines call.
   const params = {
     port,
     session,
     data,
-    predictor,
-    response
+    predictor: JSON.stringify(predictor),
+    response: JSON.stringify(response)
   };
   let query = [];
   for (let x in params) {
@@ -153,10 +147,6 @@ const varsChanged = (origVars, logVars) => {
   // Fill the variable menus in the exploratory vis section.
   xVarDropdown.setItems(vars, d => d.name);
   yVarDropdown.setItems(vars, d => d.name);
-
-  // Fill the variable menus in the TA2 section.
-  ta2Predictor.setItems(origVars, d => d.name);
-  ta2Response.setItems(origVars, d => d.name);
 };
 
 observeStore(next => {
@@ -214,7 +204,7 @@ let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
       })));
 
     json(`/dataset/data/${prob.dataFile}`, data => {
-      store.dispatch(action.setActiveData(data.data, data.file));
+      store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
     });
   }
 });
@@ -448,19 +438,6 @@ observeStore((next, last) => {
     });
   }
 }, s => s.getIn(['modeling', 'inputVars']));
-
-observeStore(next => {
-  const predictor = next.getIn(['ta2', 'inputs', 'predictor']);
-  const response = next.getIn(['ta2', 'inputs', 'response']);
-
-  if (predictor === null || response === null) {
-    return;
-  }
-
-  select('button.train')
-    .attr('disabled', null)
-    .classed('disabled', false);
-}, s => s.getIn(['ta2', 'inputs']));
 
 observeStore(next => {
   const pipelines = next.getIn(['ta2', 'pipelines']).toJS();
