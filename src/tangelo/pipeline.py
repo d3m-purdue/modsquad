@@ -3,6 +3,7 @@ from google.protobuf.json_format import Parse
 import grpc
 import json
 import tangelo
+import time
 
 import core_pb2 as cpb
 from core_pb2_grpc import CoreStub
@@ -14,6 +15,8 @@ def post(op='', **kwargs):
         return createPipeline(**kwargs)
     elif op == 'execute':
         return executePipeline(**kwargs)
+    elif op == 'export':
+        return exportPipeline(**kwargs)
     else:
         tangelo.http_status(404)
 
@@ -55,5 +58,18 @@ def executePipeline(port=None, session=None, pipeline=None, data=None, predictor
                                                            pipeline_id=pipeline,
                                                            predict_features=[cpb.Feature(feature_id=pred,
                                                                                          data_uri=data_uri) for pred in predictor]))
+
+    return map(lambda x: json.loads(MessageToJson(x)), resp)
+
+
+def exportPipeline(port=None, session=None, pipeline=None):
+    stub = get_stub(int(port))
+
+    exec_name = '%s-%s-%f.exe' % (session, pipeline, time.time())
+    exec_uri = 'file://%s' % (exec_name)
+
+    resp = stub.ExportPipeline(cpb.PipelineExportRequest(context=Parse(session, cpb.SessionContext()),
+                                                         pipeline_id=pipeline,
+                                                         pipeline_exec_uri=exec_uri))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)

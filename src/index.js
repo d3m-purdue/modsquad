@@ -487,7 +487,27 @@ observeStore(next => {
 
   panels.select('.export')
     .on('click', d => {
-      console.log('export', d);
+      const ta2 = store.getState().get('ta2');
+      const session = JSON.stringify(ta2.get('session').toJS().context);
+      const model = ta2.get('model');
+      const port = model.get('port');
+
+      const params = {
+        port,
+        session,
+        pipeline: d.id,
+      };
+
+      let query = [];
+      for (let x in params) {
+        if (params.hasOwnProperty(x)) {
+          query.push(`${x}=${params[x]}`);
+        }
+      }
+      const url = `/pipeline/export?${query.join('&')}`;
+      json(url).post({}, resp => {
+        console.log(resp);
+      });
     });
 
   panels.select('.score-type')
