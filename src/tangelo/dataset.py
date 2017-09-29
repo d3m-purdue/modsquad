@@ -4,6 +4,7 @@ import json
 import os
 import tangelo
 
+dataPath = os.environ.get('TA3_OUTDIR', '../data/d3m')
 
 def run(op, *args, **kwargs):
     if op == 'list':
@@ -16,9 +17,10 @@ def run(op, *args, **kwargs):
 
 
 def listDatasets():
+    global dataPath
     problems = []
 
-    top = os.path.abspath('../data/d3m')
+    top = os.path.abspath(dataPath)
     walker = os.walk(top)
     for (dirpath, dirnames, filenames) in walker:
         if dirpath == top or 'problemSchema.json' not in filenames:
@@ -27,7 +29,7 @@ def listDatasets():
         # Stop os.walk() from recursing into the data or solution directories.
         dirnames = []
 
-        # Open the schema file to discover the relevant metadata about this 
+        # Open the schema file to discover the relevant metadata about this
         with open(os.path.join(dirpath, 'problemSchema.json')) as f:
             schema = json.loads(f.read())
 
@@ -55,7 +57,8 @@ def promote(value):
 
 
 def getDataset(name):
-    datafile = os.path.abspath(os.path.join('../data/d3m', name, 'data', 'trainData.csv.gz'))
+    global dataPath
+    datafile = os.path.abspath(os.path.join(dataPath, name, 'data', 'trainData.csv.gz'))
 
     try:
         reader = csv.reader(gzip.GzipFile(datafile))
