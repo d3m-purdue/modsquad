@@ -1,6 +1,7 @@
 from google.protobuf.json_format import MessageToJson
 from google.protobuf.json_format import Parse
 import grpc
+import json
 import tangelo
 
 import core_pb2 as cpb
@@ -13,11 +14,14 @@ def post(port=None, session=None, data=None, predictor=None, response=None):
 
     data_uri = 'file://%s' % (data)
 
+    predictor = json.loads(predictor)
+    response = json.loads(response)
+
     resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=Parse(session, cpb.SessionContext()),
-                                                          train_features=[cpb.Feature(feature_id=predictor,
-                                                                                      data_uri=data_uri)],
-                                                          target_features=[cpb.Feature(feature_id=response,
-                                                                                       data_uri=data_uri)],
+                                                          train_features=[cpb.Feature(feature_id=pred,
+                                                                                      data_uri=data_uri) for pred in predictor],
+                                                          target_features=[cpb.Feature(feature_id=targ,
+                                                                                       data_uri=data_uri) for targ in response],
                                                           task=cpb.TaskType.Value('REGRESSION'),
                                                           task_description='Linear model creation'))
 
