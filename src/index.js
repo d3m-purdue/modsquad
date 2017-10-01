@@ -159,13 +159,18 @@ const varsChanged = (origVars, logVars) => {
 
 
 // check if a variable is discrete or continuous by observing up to first 25 elements
+// This routine is a heuristic to determine if a feature is numeric or string and continuous
+// or discrete.  The type of the variable is examined first, but numbers might be represented
+// as strings, like '345', so an attempt is made to convert to numbers.  If the number of different
+// values is < 70% of the length of the examined array, the feature is assumed to be discrete. 
+
 function determineVariableType(variable) {
   let uniqueValues = 0
   let numberCount = 0
   let stringCount = 0
   let values = []
-  lengthToTest = Math.min(25,variable.length)
-  for (i=0;i<lengthToTest;i++) {
+  let lengthToTest = Math.min(25,variable.length)
+  for (var i=0;i<lengthToTest;i++) {
     //console.log(variable[i])
     if (typeof(variable[i]) == "number") {
       numberCount += 1
@@ -178,12 +183,13 @@ function determineVariableType(variable) {
       values.push(variable[i])
     } 
   }
-  console.log('stringcount',stringCount, 'numberCount',numberCount,'values',values)
+  //console.log('stringcount',stringCount, 'numberCount',numberCount,'values',values)
   let outRec = {}
   outRec.discrete = (values.length < lengthToTest / 1.5  ? true : false)
   outRec.type = ((stringCount > 0) ? 'string' : 'number')
   return outRec
 }
+
 
 // Draw the plots of each variable inside their collapsible buttons
 // Candela plots are added for each variable.  
@@ -376,6 +382,10 @@ observeStore(next => {
     return x;
   };
 
+  // Get the selected yVar as the modeling variable.  Then build up the 'vars' variable
+  // that contains all the feature data columns.  We will need this to generate a plot for
+  // each feature
+
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
   const data = immData.toJS();
@@ -386,9 +396,8 @@ observeStore(next => {
     name,
     data: data.map(datum => datum[name])
   }));
-  //console.log('vars',vars)
 
-  // If both variables are selected, display a scatterplot of them.
+  // If the modeling variable is filled display a row of scatterplots
   if (yVar  ) {
 
     // clear out the previous display
@@ -396,25 +405,31 @@ observeStore(next => {
     elmatrix.selectAll('*')
       .remove();
 
+    // loop through the features and draw a plot for each feature compared to the modeling feature
     for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
-      if (vars[featureIndex].name != yVar.name) {
+      // ignore the case where the modeling feature is plotted against itself
+      if ((vars[featureIndex].name != yVar.name) && 
+	  (determineVariableType(vars[featureIndex].data).type=='number')) {
+        // fill the yVar object
         const data = yVar.data.map((d, i) => ({
           x: yVar.data[i],
           y: vars[featureIndex].data[i],
           name: d 
         }));
 
+        // add a new Div inside the #scatterplotmatrix element
         jQuery('<div/>', {
           id: vars[featureIndex].name,
           }).appendTo('#scatterplotmatrix');
 
+        // create a new plot for this variable combination
         var plotElement = document.getElementById(vars[featureIndex].name)
         const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
           data,
           x: 'x',
           y: 'y', 
-          width: 200*plotSizeScale,
-          height: 300*plotSizeScale
+          width: 400*plotSizeScale,
+          height: 400*plotSizeScale
         });
         vismatrix.render();
       }
