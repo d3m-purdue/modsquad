@@ -1,37 +1,30 @@
 .container-fluid
   .exploratory-vis
-    .row
-      .col-md-6
-        h4 Bivariate Visualization
+
+    .row(style='margin-top:150')
+      .col-md-10
+        h4 Compare the Target Feature Against All Others 
         p(style='margin-left:40;margin-top:50;margin-right:50')
-          | This portion of the interface is to explore if two features in the 
-          | problem dataset are related to each other.  Please select two features
-          | to display along the X and Y axes.  All the points in the problem dataset
-          | will be plotted in the chart.  
+          | This portion of the interface explores the target feature against 
+          | all other features simultaneously. A plot is generated with the target
+          | feature values along the X axis and one of the other features in the 
+          | dataset on each Y axis -- showing whether any features are related 
+          | to the target feature or not. 
         p(style='margin-left:40;margin-top:50;margin-right:50')
           | If the points appear to be randomly arranged, as a cloud of dots, 
           | the feature variable is not strongly correlated with the target 
           | variable. If the points are visually tightly grouped around some 
           | pattern (such as a line or curve), then there is a relationship 
-          |between the two variables
+          | between the two variables
+
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | Select the target variable below to generate the plots (TODO: automatically
+          | set this according to the problem declaration. 
         .btn-group
           #x-dropdown
-          #y-dropdown
-
-      .col-md-6
-        #scatterplot
-    .hr(style='width:75%')
-    .row(style='margin-top:150')
-      .col-md-6
-        h4 Three Feature Visualization
-        p(style='margin-left:40;margin-top:50;margin-right:50')
-          | This portion of the interface explores the training feature against 
-          | all other features simultaneously.  Each plot is similar to the one
-          | above, showing whether any two features are related or not. 
 
     .row(style='margin-top:50')
       .col-md-10
         #scatterplotmatrix
-
 
 

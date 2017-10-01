@@ -140,21 +140,23 @@ let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
   buttonText: 'x',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(0, item));
-  }
-});
-let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
-  buttonText: 'y',
-  onSelect: item => {
-    store.dispatch(action.setExploratoryVar(1, item));
     store.dispatch(action.setExploratoryVarMatrix(0, item));
   }
 });
+
+//let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
+//  buttonText: 'y',
+//  onSelect: item => {
+//    store.dispatch(action.setExploratoryVar(1, item));
+//  }
+//});
+
 const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
 
   // Fill the variable menus in the exploratory vis section.
   xVarDropdown.setItems(vars, d => d.name);
-  yVarDropdown.setItems(vars, d => d.name);
+  //yVarDropdown.setItems(vars, d => d.name);
 };
 
 
@@ -386,6 +388,9 @@ observeStore(next => {
   // that contains all the feature data columns.  We will need this to generate a plot for
   // each feature
 
+  // TODO: It would have been better to pass in the inputVars, but I wasn't sure how to get
+  // them automatically updated, so just pull them from the store below. 
+
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
   const data = immData.toJS();
@@ -407,9 +412,16 @@ observeStore(next => {
 
     // loop through the features and draw a plot for each feature compared to the modeling feature
     for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
+
       // ignore the case where the modeling feature is plotted against itself
+      // also ignore cases where the Y feature is non-numeric by testing using a heuristic
+      // and where the feature is an internal d3mIndex added to all datasets, this would confuse
+      // a problem-oriented user
+
       if ((vars[featureIndex].name != yVar.name) && 
+          (vars[featureIndex].name != 'd3mIndex') &&
 	  (determineVariableType(vars[featureIndex].data).type=='number')) {
+
         // fill the yVar object
         const data = yVar.data.map((d, i) => ({
           x: yVar.data[i],
@@ -418,6 +430,9 @@ observeStore(next => {
         }));
 
         // add a new Div inside the #scatterplotmatrix element
+        jQuery('<h5/>', {
+          text: vars[featureIndex].name,
+          }).appendTo('#scatterplotmatrix');
         jQuery('<div/>', {
           id: vars[featureIndex].name,
           }).appendTo('#scatterplotmatrix');
