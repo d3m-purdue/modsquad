@@ -1,4 +1,5 @@
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
+import Histogram from 'candela/plugins/vega/Histogram';
 import InitSize from 'candela/plugins/mixin/InitSize';
 
 const sq = (x) => x * x;
@@ -44,7 +45,16 @@ class NormalPlot extends InitSize(ScatterPlot) {
   }
 }
 
+// add histogram plot type
+class HistogramPlot extends InitSize(Histogram) {
+  constructor (el, options) {
+    super(el, xformData(options));
+  }
+}
+
+
 export {
   inverf,
-  NormalPlot
+  NormalPlot,
+  HistogramPlot
 };

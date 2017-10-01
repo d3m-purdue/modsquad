@@ -18,6 +18,10 @@ setExploratoryVar:
   - which
   - var
 
+setExploratoryVarMatrix:
+  - which
+  - var
+
 setModelType:
   - model
 

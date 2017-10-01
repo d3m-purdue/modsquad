@@ -1,5 +1,6 @@
 import 'bootstrap/dist/js/bootstrap';
 import ScatterPlot from 'candela/plugins/vega/ScatterPlot';
+import BoxPlot from 'candela/plugins/vega/BoxPlot';
 import { select,
          selectAll } from 'd3-selection';
 import { json } from 'd3-request';
@@ -12,6 +13,7 @@ import { action,
 import Dropdown from './util/Dropdown';
 import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
+import { HistogramPlot } from './util/stats';
 import { allVars } from './util';
 import varTemplate from './template/var.jade';
 import pipelineTemplate from './template/pipeline.jade';
@@ -19,6 +21,9 @@ import metadataTemplate from './template/metadata.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
+
+// easy way to rescale the embedded plot dimensions, while preserving aspect ratio
+const plotSizeScale = 2.5
 
 // Construct a markdown renderer.
 const md = new Remarkable();
@@ -141,6 +146,7 @@ let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
   buttonText: 'y',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(1, item));
+    store.dispatch(action.setExploratoryVarMatrix(0, item));
   }
 });
 const varsChanged = (origVars, logVars) => {
@@ -150,6 +156,37 @@ const varsChanged = (origVars, logVars) => {
   xVarDropdown.setItems(vars, d => d.name);
   yVarDropdown.setItems(vars, d => d.name);
 };
+
+
+// check if a variable is discrete or continuous by observing up to first 25 elements
+function determineVariableType(variable) {
+  let uniqueValues = 0
+  let numberCount = 0
+  let stringCount = 0
+  let values = []
+  lengthToTest = Math.min(25,variable.length)
+  for (i=0;i<lengthToTest;i++) {
+    //console.log(variable[i])
+    if (typeof(variable[i]) == "number") {
+      numberCount += 1
+    } else if (! isNaN(Number(variable[i])) ) {
+      numberCount += 1
+    } else if (typeof(variable[i]) == "string") {
+      stringCount += 1
+    }
+    if (values.includes(variable[i])== false) {
+      values.push(variable[i])
+    } 
+  }
+  console.log('stringcount',stringCount, 'numberCount',numberCount,'values',values)
+  let outRec = {}
+  outRec.discrete = (values.length < lengthToTest / 1.5  ? true : false)
+  outRec.type = ((stringCount > 0) ? 'string' : 'number')
+  return outRec
+}
+
+// Draw the plots of each variable inside their collapsible buttons
+// Candela plots are added for each variable.  
 
 observeStore(next => {
   const vars = next.get('vars').toJS();
@@ -175,13 +212,22 @@ observeStore(next => {
   panels.select('.panel-body')
     .select('.vis')
     .each(function (d) {
-      const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
+     const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300,
-        height: 200
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
       });
       vis.render();
+
+      // add second plot
+      const vis2= new NormalPlot(this, { // eslint-disable-line no-unused-vars
+        data: d.data,
+        opacity: 0.9,
+        width: 300*plotSizeScale,
+        height: 200*plotSizeScale
+      });
+      vis2.render();
     });
 
   panels.select('.log')
@@ -267,7 +313,8 @@ observeStore(next => {
     });
 }, s => s.get('logVars'));
 
-// When the exploratory vis variables change, update the menus.
+
+// When the exploratory vis variables change, update the menus and draw a plot
 observeStore(next => {
   const exploratoryVis = next.get('exploratoryVis');
 
@@ -307,12 +354,75 @@ observeStore(next => {
       x: 'x',
       y: 'y',
       opacity: 0.9,
-      width: 600,
-      height: 600
+      width: 300*plotSizeScale,
+      height: 400*plotSizeScale
     });
     vis.render();
   }
 }, s => s.get('exploratoryVis'));
+
+// add a row of scatterplots ; show plots for all variables against the trainingVariable
+// When the exploratory vis matrix variables change, update the row of plots 
+
+observeStore(next => {
+  const exploratoryVisMatrix = next.get('exploratoryVisMatrix');
+
+  // Collect the variable data.
+  const get = key => {
+    let x = exploratoryVisMatrix.get(key);
+    if (x !== null) {
+      x = x.toJS();
+    }
+    return x;
+  };
+
+  const yVar = get('yVar');
+  const immData = next.getIn(['data', 'data']);
+  const data = immData.toJS();
+  console.log('yvar',yVar)
+
+  const names = Object.keys(data[0]);
+
+  // Gather up a list of new variables to create.
+  const vars = names.map(name => ({
+    name,
+    data: data.map(datum => datum[name])
+  }));
+ console.log('vars',vars)
+
+  // Set the text on the dropdown menus.
+  const setName = (which, label, v) => {
+    select(which)
+      .text(v ? `${label}: ${v.name}` : label);
+  };
+  setName('button.var1', 'Y', yVar);
+
+  // If both variables are selected, display a scatterplot of them.
+  if (yVar  ) {
+
+    const data = yVar.data.map((d, i) => ({
+      y: yVar.data[i],
+      name: d 
+    }));
+
+    const elmatrix = select('#scatterplotmatrix');
+    console.log(elmatrix);
+    elmatrix.selectAll('*')
+      .remove();
+
+    const vismatrix = new ScatterPlot(elmatrix.node(), { // eslint-disable-line no-unused-vars
+      data,
+      x: 'x',
+      y: 'y', 
+      width: 200*plotSizeScale,
+      height: 300*plotSizeScale
+    });
+    vismatrix.render();
+  }
+
+}, s => s.get('exploratoryVisMatrix'));
+
+
 
 // When the model changes, update the input variables.
 observeStore(next => {

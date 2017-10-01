@@ -3,18 +3,35 @@
     .row
       .col-md-6
         h4 Bivariate Visualization
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | This portion of the interface is to explore if two features in the 
+          | problem dataset are related to each other.  Please select two features
+          | to display along the X and Y axes.  All the points in the problem dataset
+          | will be plotted in the chart.  
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | If the points appear to be randomly arranged, as a cloud of dots, 
+          | the feature variable is not strongly correlated with the target 
+          | variable. If the points are visually tightly grouped around some 
+          | pattern (such as a line or curve), then there is a relationship 
+          |between the two variables
         .btn-group
           #x-dropdown
           #y-dropdown
 
-          //-span.dropdown
-            //-button.var1.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            //-ul.dropdown-menu.variable1
-
-          //-span.dropdown
-            //-button.var2.btn.btn-default.dropdown-toggle(data-toggle="dropdown")
-            //-ul.dropdown-menu.variable2
-
-    .row
       .col-md-6
         #scatterplot
+    .hr(style='width:75%')
+    .row(style='margin-top:150')
+      .col-md-6
+        h4 Three Feature Visualization
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | This portion of the interface explores the training feature against 
+          | all other features simultaneously.  Each plot is similar to the one
+          | above, showing whether any two features are related or not. 
+
+    .row(style='margin-top:50')
+      .col-md-10
+        #scatterplotmatrix
+
+
+
