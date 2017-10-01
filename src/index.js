@@ -379,45 +379,46 @@ observeStore(next => {
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
   const data = immData.toJS();
-  console.log('yvar',yVar)
-
   const names = Object.keys(data[0]);
 
-  // Gather up a list of new variables to create.
+  // Gather up the features as separate entries in a vars list 
   const vars = names.map(name => ({
     name,
     data: data.map(datum => datum[name])
   }));
- console.log('vars',vars)
-
-  // Set the text on the dropdown menus.
-  const setName = (which, label, v) => {
-    select(which)
-      .text(v ? `${label}: ${v.name}` : label);
-  };
-  setName('button.var1', 'Y', yVar);
+  //console.log('vars',vars)
 
   // If both variables are selected, display a scatterplot of them.
   if (yVar  ) {
 
-    const data = yVar.data.map((d, i) => ({
-      y: yVar.data[i],
-      name: d 
-    }));
-
+    // clear out the previous display
     const elmatrix = select('#scatterplotmatrix');
-    console.log(elmatrix);
     elmatrix.selectAll('*')
       .remove();
 
-    const vismatrix = new ScatterPlot(elmatrix.node(), { // eslint-disable-line no-unused-vars
-      data,
-      x: 'x',
-      y: 'y', 
-      width: 200*plotSizeScale,
-      height: 300*plotSizeScale
-    });
-    vismatrix.render();
+    for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
+      if (vars[featureIndex].name != yVar.name) {
+        const data = yVar.data.map((d, i) => ({
+          x: yVar.data[i],
+          y: vars[featureIndex].data[i],
+          name: d 
+        }));
+
+        jQuery('<div/>', {
+          id: vars[featureIndex].name,
+          }).appendTo('#scatterplotmatrix');
+
+        var plotElement = document.getElementById(vars[featureIndex].name)
+        const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+          data,
+          x: 'x',
+          y: 'y', 
+          width: 200*plotSizeScale,
+          height: 300*plotSizeScale
+        });
+        vismatrix.render();
+      }
+    }
   }
 
 }, s => s.get('exploratoryVisMatrix'));

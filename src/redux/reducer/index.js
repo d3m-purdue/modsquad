@@ -16,6 +16,9 @@ const initial = Immutable.fromJS({
     xVar: null,
     yVar: null
   },
+  exploratoryVisMatrix: {
+    yVar: null
+  },
   modeling: {
     model: null,
     inputVars: null
@@ -72,6 +75,15 @@ const reducer = (state = initial, action = {}) => {
         throw new Error(`illegal action.which: ${action.which}`);
       }
       break;
+
+   case actionType.setExploratoryVarMatrix:
+      if (action.which === 0) {
+        newState = state.setIn(['exploratoryVisMatrix', 'yVar'], Immutable.fromJS(action.var));
+      } else {
+        throw new Error(`illegal action.which: ${action.which}`);
+      }
+      break;
+
 
     case actionType.setModelType:
       if (['linear', 'quadratic', 'loess'].indexOf(action.model) < 0) {
