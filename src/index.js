@@ -393,6 +393,11 @@ observeStore(next => {
 
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
+
+  if (!immData) {
+    return;
+  }
+
   const data = immData.toJS();
   const names = Object.keys(data[0]);
 
