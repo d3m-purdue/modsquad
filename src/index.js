@@ -37,17 +37,17 @@ json('/dataset/list', problems => {
 });
 
 // Install the model choices.
-let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
-  buttonText: 'Model',
-  onSelect: item => {
-    store.dispatch(action.setModelType(item));
-  }
-});
-modelDropdown.setItems([
-  'linear',
-  'quadratic',
-  'loess'
-]);
+// let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
+  // buttonText: 'Model',
+  // onSelect: item => {
+    // store.dispatch(action.setModelType(item));
+  // }
+// });
+// modelDropdown.setItems([
+  // 'linear',
+  // 'quadratic',
+  // 'loess'
+// ]);
 
 // Install the TA2 options.
 let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
