@@ -63,7 +63,7 @@ module.exports = candelaLoaders({
   plugins: [
     new HtmlPlugin({
       template: './src/index.template.ejs',
-      title: 'Modsquad (by Purdue)',
+      title: 'ModSquad',
       chunks: [
         'index'
       ]
