@@ -3,6 +3,7 @@ import Immutable from 'immutable';
 import { actionType } from '../action';
 
 const initial = Immutable.fromJS({
+  config: null,
   data: {
     data: null,
     name: null,
@@ -42,6 +43,10 @@ const reducer = (state = initial, action = {}) => {
   }
 
   switch (action.type) {
+    case actionType.setConfig:
+      newState = state.set('config', Immutable.fromJS(action.config));
+      break;
+
     case actionType.setProblemList:
       newState = state.set('problems', Immutable.fromJS(action.problems));
       break;
