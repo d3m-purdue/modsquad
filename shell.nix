@@ -34,7 +34,7 @@ stdenv.mkDerivation {
     export R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE
 
     # Put readline in the LD_LIBRARY_PATH.
-    export LD_LIBRARY_PATH=${readline}/lib:$LD_LIBRARY_PATH
+    export LD_LIBRARY_PATH=${readline}/lib:${stdenv.cc.cc.lib}/lib:$LD_LIBRARY_PATH
 
     # Augment PKG_CONFIG_PATH.
     export PKG_CONFIG_PATH=${cairo.dev}/lib/pkgconfig:${libpng.dev}/lib/pkgconfig:${zlib.dev}/lib/pkgconfig:$PKG_CONFIG_PATH
