@@ -28,6 +28,11 @@ const plotSizeScale = 2.5
 // Construct a markdown renderer.
 const md = new Remarkable();
 
+// Read in the NIST config file.
+json('/config', cfg => {
+  store.dispatch(action.setConfig(cfg));
+});
+
 // Install the content template.
 select(document.body).html(body());
 
