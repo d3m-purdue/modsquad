@@ -1,0 +1,8 @@
+*.swp
+node_modules/
+package-lock.json
+build/
+.Rhistory
+rlib/
+venv/
+data/
