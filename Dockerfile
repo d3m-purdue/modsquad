@@ -16,7 +16,6 @@ COPY . /d3m-ta3
 
 WORKDIR /d3m-ta3
 
-RUN pip install -r requirements.txt
 RUN pip install virtualenv
 RUN npm install
 RUN npm run pythonprep
