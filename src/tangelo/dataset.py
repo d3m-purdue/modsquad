@@ -9,8 +9,12 @@ dataRoot = os.environ.get('TA3_OUTDIR', '../data/d3m')
 def run(op, *args, **kwargs):
     if op == 'list':
         return listDatasets()
+    elif op == 'listtesting':
+        return listTestingDataset()
     elif op == 'data':
         return getDataset(*args, **kwargs)
+    elif op == 'datatesting':
+        return getTestingDataset()
     else:
         tangelo.http_status(404)
         return 'illegal operation "%s"' % (op) if op else 'missing operation'
@@ -45,6 +49,22 @@ def listDatasets():
     return problems
 
 
+def listTestingDataset():
+    problemSchemaFile = os.environ.get('PROBLEM_SCHEMA')
+
+    with open(problemSchemaFile) as f:
+        schema = json.loads(f.read())
+
+    dataPath = os.path.dirname(problemSchemaFile)
+    with open(os.path.join(dataPath, schema['descriptionFile'])) as f:
+        description = f.read()
+
+    return [{'problemId': schema['problemId'],
+             'description': description,
+             'metadata': schema,
+             'dataFile': '%s' % (os.path.basename(dataPath))}]
+
+
 def promote(value):
     try:
         value = int(value)
@@ -55,6 +75,14 @@ def promote(value):
             pass
 
     return value
+
+
+def getTestingDataset():
+    global dataRoot
+    dataRoot = os.path.dirname(os.environ.get('TRAINING_DATA_ROOT'))
+    dataRoot, dataset = os.path.split(dataRoot)
+
+    return getDataset(dataset)
 
 
 def getDataset(name):
