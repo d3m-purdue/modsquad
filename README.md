@@ -15,6 +15,7 @@ A prototype TA3 application enabling a hypothetical modeling task
 
 6. Build the application: `npm run build`.
 
-7. Serve the application: `npm run serve`.
+7. Serve the application: `JSON_CONFIG_PATH=/path/to/NIST/config/file npm run
+   serve`.
 
 8. Run the application: http://localhost:8080
