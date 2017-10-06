@@ -31,15 +31,18 @@ const md = new Remarkable();
 // Read in the NIST config file.
 json('/config', cfg => {
   store.dispatch(action.setConfig(cfg));
+  json('/dataset/listtesting', problems => {
+    store.dispatch(action.setProblemList(problems));
+  });
 });
 
 // Install the content template.
 select(document.body).html(body());
 
 // Install the list of problems.
-json('/dataset/list', problems => {
-  store.dispatch(action.setProblemList(problems));
-});
+//json('/dataset/list', problems => {
+  //store.dispatch(action.setProblemList(problems));
+//});
 
 // Install the model choices.
 // let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
@@ -264,7 +267,8 @@ let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
         metadata: prob.metadata
       })));
 
-    json(`/dataset/data/${prob.dataFile}`, data => {
+    //json(`/dataset/data/${prob.dataFile}`, data => {
+    json('/dataset/datatesting', data => {
       store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
     });
   }
