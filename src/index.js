@@ -22,6 +22,10 @@ import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
 
+function stripFirstPathComponent (path) {
+  return '/' + path.split('/').slice(2).join('/');
+}
+
 // easy way to rescale the embedded plot dimensions, while preserving aspect ratio
 const plotSizeScale = 2.5
 
@@ -90,7 +94,7 @@ select('button.train').on('click', () => {
     .filter(f => f.varRole === 'target')
     // .filter(f => f.varType === 'integer' || f.varType === 'float')
     .map(f => f.varName);
-  const data = store.getState().getIn(['data', 'path']);
+  const data = stripFirstPathComponent(store.getState().getIn(['data', 'path']));
   const task_type = store.getState().getIn(['problems', 0, 'metadata', 'taskType']);
   const task_subtype = store.getState().getIn(['problems', 0, 'metadata', 'taskSubType']);
   const output_type = store.getState().getIn(['problems', 0, 'metadata', 'outputType']);
