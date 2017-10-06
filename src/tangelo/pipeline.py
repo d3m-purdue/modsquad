@@ -28,7 +28,7 @@ def get_stub(port):
     return stub
 
 
-def createPipeline(port=None, session=None, data=None, predictor=None, response=None):
+def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None):
     stub = get_stub(int(port))
 
     data_uri = 'file://%s' % (data)
@@ -41,8 +41,8 @@ def createPipeline(port=None, session=None, data=None, predictor=None, response=
                                                                                       data_uri=data_uri) for pred in predictor],
                                                           target_features=[cpb.Feature(feature_id=targ,
                                                                                        data_uri=data_uri) for targ in response],
-                                                          task=cpb.TaskType.Value('REGRESSION'),
-                                                          task_description='Linear model creation'))
+                                                          task=cpb.TaskType.Value(task_type.upper()),
+                                                          task_description='TA2 pipeline creation'))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)
 

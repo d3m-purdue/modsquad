@@ -15,10 +15,6 @@ stdenv.mkDerivation {
     python27Full
     python27Packages.virtualenv
     python27Packages.pip
-
-    R
-    rPackages.devtools
-    rPackages.withr
   ];
   src = null;
   shellHook = ''
