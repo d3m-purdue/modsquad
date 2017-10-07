@@ -2,3 +2,7 @@
   display: d3mLm
   port: 50001
   description: Mock TA2 module to compute a linear model from one or more predictor variables, and a single response variable.
+- name: feature-labs 
+  display: feature-labss
+  port: 50051
+  description: MIT Feature Labs TA2 
