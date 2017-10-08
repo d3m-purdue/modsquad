@@ -92,6 +92,8 @@ select('button.train').on('click', () => {
     .map(f => f.varName);
   const data = store.getState().getIn(['data', 'path']);
   const task_type = store.getState().getIn(['problems', 0, 'metadata', 'taskType']);
+  const task_subtype = store.getState().getIn(['problems', 0, 'metadata', 'taskSubType']);
+  const output_type = store.getState().getIn(['problems', 0, 'metadata', 'outputType']);
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {
@@ -100,7 +102,9 @@ select('button.train').on('click', () => {
     data,
     predictor: JSON.stringify(predictor),
     response: JSON.stringify(response),
-    task_type
+    task_type,
+    task_subtype,
+    output_type
   };
   let query = [];
   for (let x in params) {
