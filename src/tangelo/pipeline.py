@@ -2,6 +2,7 @@ from google.protobuf.json_format import MessageToJson
 from google.protobuf.json_format import Parse
 import grpc
 import json
+import re
 import tangelo
 import time
 
@@ -19,6 +20,10 @@ def post(op='', **kwargs):
         return exportPipeline(**kwargs)
     else:
         tangelo.http_status(404)
+
+
+def toConstCase(s):
+    return '_'.join(map(lambda x: x.upper(), re.findall('[a-zA-Z][^A-Z]*', s)))
 
 
 def get_stub(port):
@@ -42,8 +47,8 @@ def createPipeline(port=None, session=None, data=None, predictor=None, response=
                                                           target_features=[cpb.Feature(feature_id=targ,
                                                                                        data_uri=data_uri) for targ in response],
                                                           task=cpb.TaskType.Value(task_type.upper()),
-                                                          task_subtype=cpb.TaskSubType.Value(task_subtype.upper()),
-                                                          output=cpb.OutputType.Value(output_type.upper()),
+                                                          task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
+                                                          output=cpb.OutputType.Value(toConstCase(output_type)),
                                                           task_description='TA2 pipeline creation'))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)
