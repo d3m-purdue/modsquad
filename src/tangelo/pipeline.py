@@ -23,7 +23,13 @@ def post(op='', **kwargs):
 
 
 def toConstCase(s):
-    return '_'.join(map(lambda x: x.upper(), re.findall('[a-zA-Z][^A-Z]*', s)))
+    def corner_cases(tag):
+        if tag == 'MULTI_CLASS':
+            return 'MULTICLASS'
+        else:
+            return tag
+
+    return corner_cases('_'.join(map(lambda x: x.upper(), re.findall('[a-zA-Z][^A-Z]*', s))))
 
 
 def get_stub(port):
