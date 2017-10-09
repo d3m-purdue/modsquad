@@ -2,6 +2,7 @@ from google.protobuf.json_format import MessageToJson
 from google.protobuf.json_format import Parse
 import grpc
 import json
+import re
 import tangelo
 import time
 
@@ -21,6 +22,10 @@ def post(op='', **kwargs):
         tangelo.http_status(404)
 
 
+def toConstCase(s):
+    return '_'.join(map(lambda x: x.upper(), re.findall('[a-zA-Z][^A-Z]*', s)))
+
+
 def get_stub(port):
     channel = grpc.insecure_channel('localhost:%d' % (int(port)))
     stub = CoreStub(channel)
@@ -28,7 +33,7 @@ def get_stub(port):
     return stub
 
 
-def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None):
+def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None):
     stub = get_stub(int(port))
 
     data_uri = 'file://%s' % (data)
@@ -42,6 +47,8 @@ def createPipeline(port=None, session=None, data=None, predictor=None, response=
                                                           target_features=[cpb.Feature(feature_id=targ,
                                                                                        data_uri=data_uri) for targ in response],
                                                           task=cpb.TaskType.Value(task_type.upper()),
+                                                          task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
+                                                          output=cpb.OutputType.Value(toConstCase(output_type)),
                                                           task_description='TA2 pipeline creation'))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)
