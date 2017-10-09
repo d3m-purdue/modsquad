@@ -116,9 +116,11 @@ select('button.train').on('click', () => {
   }
   const url = `/pipeline?${query.join('&')}`;
   json(url).post({}, resp => {
-    resp = resp.filter(x => x.progressInfo === 'COMPLETED')[0];
+    resp = resp.filter(x => x.progressInfo === 'COMPLETED');
 
-    store.dispatch(action.addPipeline(resp.pipelineId, resp.pipelineInfo.predictResultUris[0], resp.pipelineInfo.scores[0], response));
+    resp.forEach(pipeline => {
+      store.dispatch(action.addPipeline(pipeline.pipelineId, pipeline.pipelineInfo.predictResultUris[0], pipeline.pipelineInfo.scores[0], response));
+    });
   });
 });
 
