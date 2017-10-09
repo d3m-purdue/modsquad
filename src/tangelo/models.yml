@@ -1,4 +1,4 @@
-- name: d3mLm
-  display: d3mLm
+- name: Charles River
+  display: Charles River
   port: 50001
-  description: Mock TA2 module to compute a linear model from one or more predictor variables, and a single response variable.
+  description: Charles River Analytics TA2 system (Eve)
