@@ -116,7 +116,7 @@ select('button.train').on('click', () => {
   }
   const url = `/pipeline?${query.join('&')}`;
   json(url).post({}, resp => {
-    resp = resp.filter(x => x.pipelineInfo)[0];
+    resp = resp.filter(x => x.progressInfo === 'COMPLETED')[0];
 
     store.dispatch(action.addPipeline(resp.pipelineId, resp.pipelineInfo.predictResultUris[0], resp.pipelineInfo.scores[0], response));
   });
