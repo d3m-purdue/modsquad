@@ -122,15 +122,11 @@ def getDataset(name):
     for trow in trows[1:]:
         tdicts.append({k: promote(v) for k, v in zip(trows[0], trow)})
     trainName = tdicts[0].keys()[1]
-    print 'trainging variable:',trainName
-    print 'tdict:',tdicts
 
     # add the training variable to the datatable
     for row in dicts:
         indexToFix = row['d3mIndex']
         row[trainName] = returnMatchTrain(indexToFix,tdicts,trainName)
-
-    print 'fixed data:',dicts
 
     schemaFile = os.path.join(dataPath, 'dataSchema.json')
 
