@@ -33,7 +33,7 @@ def get_stub(port):
     return stub
 
 
-def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None):
+def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None, metric=None):
     stub = get_stub(int(port))
 
     data_uri = 'file://%s' % (data)
@@ -49,7 +49,9 @@ def createPipeline(port=None, session=None, data=None, predictor=None, response=
                                                           task=cpb.TaskType.Value(task_type.upper()),
                                                           task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
                                                           output=cpb.OutputType.Value(toConstCase(output_type)),
-                                                          task_description='TA2 pipeline creation'))
+                                                          metrics=[cpb.Metric.Value(toConstCase(metric))],
+                                                          task_description='TA2 pipeline creation',
+                                                          max_pipelines=5))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)
 

@@ -94,6 +94,7 @@ select('button.train').on('click', () => {
   const task_type = store.getState().getIn(['problems', 0, 'metadata', 'taskType']);
   const task_subtype = store.getState().getIn(['problems', 0, 'metadata', 'taskSubType']);
   const output_type = store.getState().getIn(['problems', 0, 'metadata', 'outputType']);
+  const metric = store.getState().getIn(['problems', 0, 'metadata', 'metric']);
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {
@@ -104,7 +105,8 @@ select('button.train').on('click', () => {
     response: JSON.stringify(response),
     task_type,
     task_subtype,
-    output_type
+    output_type,
+    metric
   };
   let query = [];
   for (let x in params) {
@@ -114,7 +116,7 @@ select('button.train').on('click', () => {
   }
   const url = `/pipeline?${query.join('&')}`;
   json(url).post({}, resp => {
-    resp = resp.filter(x => x.pipelineInfo)[0];
+    resp = resp.filter(x => x.progressInfo === 'COMPLETED')[0];
 
     store.dispatch(action.addPipeline(resp.pipelineId, resp.pipelineInfo.predictResultUris[0], resp.pipelineInfo.scores[0], response));
   });
