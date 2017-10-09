@@ -76,6 +76,12 @@ def promote(value):
 
     return value
 
+def returnMatchTrain(index,trainData,name):
+    for row in trainData:
+        if row['d3mIndex'] == index:
+          return row[name]
+    return {}
+
 
 def getTestingDataset():
     global dataRoot
@@ -89,6 +95,7 @@ def getDataset(name):
     global dataRoot
     dataPath = os.path.abspath(os.path.join(dataRoot, name, 'data'))
     datafile = os.path.join(dataPath, 'trainData.csv')
+    targetfile = os.path.join(dataPath, 'trainTargets.csv')
 
     try:
         reader = csv.reader(open(datafile))
@@ -96,11 +103,34 @@ def getDataset(name):
         tangelo.http_status(500)
         return {'error': 'Could not open datafile for dataset %s' % (name)}
 
-    rows = list(reader)
+    try:
+        treader = csv.reader(open(targetfile))
+    except IOError:
+        tangelo.http_status(500)
+        return {'error': 'Could not open training data for dataset %s' % (name)}
 
+    rows = list(reader)
+    trows = list(treader)
+
+    # read in the initial training data
     dicts = []
     for row in rows[1:]:
         dicts.append({k: promote(v) for k, v in zip(rows[0], row)})
+
+    # read the training target variable
+    tdicts = []
+    for trow in trows[1:]:
+        tdicts.append({k: promote(v) for k, v in zip(trows[0], trow)})
+    trainName = tdicts[0].keys()[1]
+    print 'trainging variable:',trainName
+    print 'tdict:',tdicts
+
+    # add the training variable to the datatable
+    for row in dicts:
+        indexToFix = row['d3mIndex']
+        row[trainName] = returnMatchTrain(indexToFix,tdicts,trainName)
+
+    print 'fixed data:',dicts
 
     schemaFile = os.path.join(dataPath, 'dataSchema.json')
 
