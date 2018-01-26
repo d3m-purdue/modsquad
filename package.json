@@ -11,7 +11,7 @@
     "protobuf": "./venv/bin/python -m grpc_tools.protoc -I proto --python_out=src/tangelo --grpc_python_out=src/tangelo core.proto",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-8080}",
+    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE sudo ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-80}",
     "serve_d3m": "sudo nohup ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-80} &",
     "kill_d3m": "sudo pkill -f tangelo",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -32,6 +32,9 @@
     "babel-preset-es2015": "^6.24.1",
     "bootstrap": "^3.3.7",
     "bootswatch": "^3.3.7",
+    "vega" : "3.0.9",
+    "vega-scenegraph": "2.1",
+    "vega-wordcloud": "2.0.2",
     "candela": "^0.17.0",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.4",
