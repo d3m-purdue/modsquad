@@ -10,6 +10,7 @@ ul.nav.nav-tabs
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
   li: a(href="#ta2" data-toggle="tab" aria-expanded="true") TA2
   //-li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
+  li: a(href="#stopping" data-toggle="tab" aria-expanded="true") Quit
 
 .tab-content
   #problems.tab-pane.fade.active.in
@@ -26,3 +27,6 @@ ul.nav.nav-tabs
 
   //-#modeling.tab-pane.fade.in
     //-include template/modeling.jade
+
+  #stopping.tab-pane.fade.in
+    include template/stopping.jade

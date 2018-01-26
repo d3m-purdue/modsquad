@@ -1,6 +1,6 @@
 FROM r-base:3.4.1
 
-EXPOSE 8080
+EXPOSE 80
 
 RUN apt-get update
 RUN apt-get install -y git curl sudo python2.7 python2.7-dev gnupg1 python-pip libcairo2-dev
@@ -22,8 +22,8 @@ RUN npm run pythonprep
 RUN npm run protobuf
 RUN npm run build
 
-#ENTRYPOINT npm run serve -- -np --host=0.0.0.0
+ENTRYPOINT npm run serve -- -np --host=0.0.0.0
 
 # work-around for non-interactive shells
-RUN echo '#!/bin/bash npm run serve -- -np --host=0.0.0.0'  > /usr/bin/ta3_search
+RUN echo '#!/bin/bash cd /d3m-ta3; npm run serve -- -np --host=0.0.0.0'  > /usr/bin/ta3_search
 RUN chmod +x /usr/bin/ta3_search
