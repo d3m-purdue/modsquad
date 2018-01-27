@@ -16,6 +16,9 @@ COPY . /d3m-ta3
 
 WORKDIR /d3m-ta3
 
+# install for stop command in base interpreter
+RUN pip install psutil
+
 RUN pip install virtualenv
 RUN npm install
 RUN npm run pythonprep
@@ -24,6 +27,10 @@ RUN npm run build
 
 ENTRYPOINT npm run serve -- -np --host=0.0.0.0
 
-# work-around for non-interactive shells
+# from NIST - ta3_search for non-interactive shells
 RUN echo '#!/bin/bash cd /d3m-ta3; npm run serve -- -np --host=0.0.0.0'  > /usr/bin/ta3_search
 RUN chmod +x /usr/bin/ta3_search
+
+# quit command
+RUN echo '#!/usr/bin/python /d3m-ta3/build/ta3_quit.py'  > /usr/bin/ta3_quit
+RUN chmod +x /usr/bin/ta3_quit

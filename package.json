@@ -61,7 +61,6 @@
     "telegraph-events": "^1.0.3",
     "url-loader": "^0.5.9",
     "webpack": "^3.0.0",
-    "exit":"0.1.2",
     "yaml-loader": "^0.4.0"
   }
 }

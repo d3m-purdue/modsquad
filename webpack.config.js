@@ -78,6 +78,8 @@ module.exports = candelaLoaders({
       { from: 'src/tangelo/dataset.py', to: 'dataset.py' },
       { from: 'src/tangelo/pipeline.py', to: 'pipeline.py' },
       { from: 'src/tangelo/session.py', to: 'session.py' },
+      { from: 'src/tangelo/stopProcess.py', to: 'stopProcess.py' },      
+      { from: 'src/ta3_quit.py', to: 'ta3_quit.py' },
       { from: 'src/tangelo/core_pb2.py', to: 'core_pb2.py' },
       { from: 'src/tangelo/core_pb2_grpc.py', to: 'core_pb2_grpc.py' }
     ])

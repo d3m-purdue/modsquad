@@ -18,11 +18,16 @@ import { allVars } from './util';
 import varTemplate from './template/var.jade';
 import pipelineTemplate from './template/pipeline.jade';
 import metadataTemplate from './template/metadata.jade';
-import stoppingTemplate from './template/stopping.jade';
+
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
 
+import stoppingTemplate from './template/stopping.jade';
+import stopProcess from './util/stopProcess';
+
+
+ 
 // easy way to rescale the embedded plot dimensions, while preserving aspect ratio
 const plotSizeScale = 2.5
 
@@ -684,12 +689,3 @@ observeStore(next => {
 }, s => s.getIn(['ta2', 'pipelines']));
 
 
-// added to quit server processing when user selects the button
-
-function stopProcess() {
-  console.log("Controlled stop of the Purdue Modsquad TA3");
-  console.error("yay");
-  exit(5);
- }
-
- 
