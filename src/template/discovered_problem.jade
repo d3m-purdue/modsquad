@@ -1,0 +1,14 @@
+.container-fluid
+  .discovered_problem
+    .row
+      .col-md-6
+        h4 Parameters
+
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | If you brought your own dataset to be explored, please
+          | drop the dataset on the region marked below.  
+          
+    <div id="drop_zone" style="margin-left:30px; margin-top:30px; width:350px; height:200px; background-color:darkseagreen"><h>Drop files here</h></div>
+
+<script>    var dropZone = document.getElementById('drop_zone'); dropZone.addEventListener('dragover', handleDragOver, false); dropZone.addEventListener('drop', handleFileSelect, false);</script>
+

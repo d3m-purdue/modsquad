@@ -5,14 +5,32 @@ nav.navbar.navbar-inverse
       a.navbar-brand ModSquad
 
 ul.nav.nav-tabs
-  li.active: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
+  li.active: a(href="#welcome" data-toggle="tab" aria-expanded="true") Welcome 
+  li: a(href="#discovered" data-toggle="tab" aria-expanded="true") New Dataset 
+  li: a(href="#datasets" data-toggle="tab" aria-expanded="true") Dataset Selection
+  li: a(href="#newproblem" data-toggle="tab" aria-expanded="true") Define New Problem
+  li: a(href="#problems" data-toggle="tab" aria-expanded="true") Problem Selection
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
-  li: a(href="#ta2" data-toggle="tab" aria-expanded="true") TA2
-  //-li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
+  li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Fit a Simple Model 
+  li: a(href="#ta2" data-toggle="tab" aria-expanded="true") Select Optimal Models (TA2)
+
 
 .tab-content
-  #problems.tab-pane.fade.active.in
+
+  #welcome.tab-pane.fade.active.in
+    include template/welcome.jade
+
+  #discovered.tab-pane.fade.in
+    include template/discovered_problem.jade
+
+  #datasets.tab-pane.fade.in
+    include template/datasets.jade
+
+  #newproblem.tab-pane.fade.in
+    include template/newproblem.jade
+
+  #problems.tab-pane.fade.in
     include template/problems.jade
 
   #variables.tab-pane.fade.in
@@ -21,8 +39,9 @@ ul.nav.nav-tabs
   #exploratory-vis.tab-pane.fade.in
     include template/exploratory-vis.jade
 
+  #modeling.tab-pane.fade.in
+    include template/modeling.jade
+
   #ta2.tab-pane.fade.in
     include template/ta2.jade
 
-  //-#modeling.tab-pane.fade.in
-    //-include template/modeling.jade

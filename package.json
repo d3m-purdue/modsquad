@@ -11,7 +11,8 @@
     "protobuf": "./venv/bin/python -m grpc_tools.protoc -I proto --python_out=src/tangelo --grpc_python_out=src/tangelo core.proto",
     "watch": "webpack -w",
     "lint": "semistandard | snazzy",
-    "serve": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE ./venv/bin/tangelo --root build --port ${PORT-8080}",
+    "serve": " ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-8080}",
+    "serve_long": "R_LIBS_SITE=$PWD/rlib:$R_LIBS_SITE nohup ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-8080} &",
     "serve_d3m": "sudo nohup ./venv/bin/tangelo --host 0.0.0.0 --root build --port ${PORT-80} &",
     "kill_d3m": "sudo pkill -f tangelo",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -43,6 +44,7 @@
     "jade-loader": "^0.8.0",
     "javascript-detect-element-resize": "^0.5.3",
     "jquery": "^3.2.1",
+    "jquery.event.drag": "^2.2",
     "less": "^2.7.2",
     "less-loader": "^4.0.4",
     "raw-loader": "^0.5.1",
@@ -59,5 +61,8 @@
     "url-loader": "^0.5.9",
     "webpack": "^3.0.0",
     "yaml-loader": "^0.4.0"
+  },
+  "dependencies": {
+    "jquery.event.drag": "^2.2.2"
   }
 }

@@ -15,12 +15,89 @@ import stringToElement from './util/stringToElement';
 import { NormalPlot } from './util/stats';
 import { HistogramPlot } from './util/stats';
 import { allVars } from './util';
+import discoveredProblemTemplate from './template/discovered_problem.jade';
+import datasetsTemplate from './template/datasets.jade';
 import varTemplate from './template/var.jade';
 import pipelineTemplate from './template/pipeline.jade';
 import metadataTemplate from './template/metadata.jade';
 import body from './index.jade';
 import './index.less';
 import models from './tangelo/models.yml';
+
+// ------------- begin drop feature
+
+ // start with an empty array that will contain a record of the CSV content of dropped files.  
+
+ var dragapp = {}
+ dragapp.fileArray = []
+ dragapp.fileCount = 0
+  
+ // accumulation datastructures  
+ dragapp.reference = []
+  
+ // this is automatically called when a file is dropped onto the file drop zone.   The text for the  files
+ // and the corresponding name are stored in the dragapp.fileArray data structure.  This lets the user minimally edit
+ // the list before creating an output. 
+
+ function load(file) {
+ var xmlfilecontent = []
+ if (file==null)
+   xmlfilecontent = "<header> <a>sometext</a> </header>"
+   else {
+   var reader = new FileReader();
+ 
+   reader.onload = function(e) {
+         // store the resulting file in browser local storage
+         var fileDict = {}
+         fileDict['name'] = file.name
+         fileDict['contents'] = e.target.result
+         dragapp.fileArray.push(fileDict)
+         dragapp.fileCount = dragapp.fileCount*1 + 1
+         console.log('dragapp file count now: ',dragapp.fileCount)
+         console.log(dragapp.fileArray)
+         // update the display lists on the web page and the delete selector (in case it is needed)
+
+   }
+
+ // read the files, which takes place in another thread.  Can't see the results immediately.
+   reader.readAsText(file);
+   }
+ }
+ 
+ // this is the callback invoked when a user drops a filename on the dropzone area.  It updates the visual
+ // content and calls the "load" function directly.  This is attached as a callback later in the file. 
+ 
+ function handleFileSelect(evt) { 
+          console.log('file drop callback')
+         evt.stopPropagation();
+         evt.preventDefault();
+                 //console.log(evt)
+         var files = evt.dataTransfer.files; // FileList object.
+ 
+         var output = [];
+         for (var i = 0, f; f = files[i]; i++) {
+           // load the tree that was dropped onto the drop pane and update the catalog of loaded
+           // datasets in the UI
+           load(f);
+         }
+ }
+ // this function and its callback assignment below are needed for the drag action to work. This is
+ // called many times during the drag over the target, but we aren't taking any explicit action until
+ // a drop occurs. 
+ 
+ function handleDragOver(evt) {
+        console.log('drag over')
+         evt.stopPropagation();
+         evt.preventDefault();
+         evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+ }
+
+
+
+
+// ------------- end drop feature
+
+
 
 // easy way to rescale the embedded plot dimensions, while preserving aspect ratio
 const plotSizeScale = 2.5
@@ -32,8 +109,8 @@ const md = new Remarkable();
 select(document.body).html(body());
 
 // Install the list of problems.
-json('/dataset/list', problems => {
-  store.dispatch(action.setProblemList(problems));
+json('/dataset/list', datasets => {
+  store.dispatch(action.setDatasetList(datasets));
 });
 
 // Install the model choices.
@@ -247,6 +324,33 @@ observeStore(next => {
     });
 }, s => s.get('vars'));
 
+// When the list of datasets changes, populate the datasets tab menu.
+let datasetDropdown = new Dropdown(select('#datasetdropdown').node(), {
+  buttonText: 'Dataset',
+  onSelect: dataset => {
+    select('.description')
+      .html(md.render(dataset.description));
+
+    select('.metadata')
+      .append(d => stringToElement(metadataTemplate({
+        metadata: dataset.metadata
+      })));
+
+    json(`/dataset/data/${dataset.dataFile}`, data => {
+      store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
+    });
+  }
+});
+// *** chanced d.problemId for datasetId?  This would need to be set in the tangelo service
+observeStore(next => {
+  const datasets = next.get('datasets').toJS();
+  datasetDropdown.setItems(datasets, d => d.datasetId);
+}, s => s.get('datasets'));
+
+
+
+
+
 // When the list of problems changes, populate the problems tab menu.
 let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
   buttonText: 'Problem',
@@ -268,6 +372,8 @@ observeStore(next => {
   const problems = next.get('problems').toJS();
   problemDropdown.setItems(problems, d => d.problemId);
 }, s => s.get('problems'));
+
+
 
 // When the list of derived log transform variables changes, update the
 // clickable state of the log transform buttons, and the list of log-variable
@@ -528,6 +634,7 @@ observeStore(next => {
   window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons.map(x => x.variableName))), 0);
 }, s => s.getIn(['modeling', 'model']));
 
+
 // When the modeling vis variables change, update the menus.
 observeStore((next, last) => {
   if (last && last.getIn(['modeling', 'inputVars']) === null) {
@@ -586,6 +693,7 @@ observeStore((next, last) => {
     });
   }
 }, s => s.getIn(['modeling', 'inputVars']));
+
 
 observeStore(next => {
   const pipelines = next.getIn(['ta2', 'pipelines']).toJS();
