@@ -26,7 +26,10 @@ import models from './tangelo/models.yml';
 import stoppingTemplate from './template/stopping.jade';
 import stopProcess from './util/stopProcess';
 
-
+// kludge of store because Redux wasn't cooperating
+var storage = {}
+storage.dataset = []
+storage.schema = null
  
 // easy way to rescale the embedded plot dimensions, while preserving aspect ratio
 const plotSizeScale = 2.5
@@ -37,18 +40,53 @@ const md = new Remarkable();
 // Read in the NIST config file.
 json('/config', cfg => {
   store.dispatch(action.setConfig(cfg));
-  json('/dataset/listtesting', problems => {
-    store.dispatch(action.setProblemList(problems));
-  });
+  //immConfig = store.getIn(['config'])
+  // now that we have the config information, look up the datasets
+  json('/dataset/data', data_contents => {
+      storage.dataset = jQuery.extend({},data_contents)
+      storage.schema = jQuery.extend({},cfg['dataset_schema'])
+      store.dispatch(action.setActiveData(storage.dataset));
+      store.dispatch(action.setDataSchema(cfg['dataset_schema']));
+      //console.log('data returned from service:',store.getState().getIn(['data','data']))
+      json('/dataset/listfeatures', features => {
+        store.dispatch(action.setVariables(features));
+        console.log('data returned from service:',features)
+      }); 
+    }); 
 });
+
 
 // Install the content template.
 select(document.body).html(body());
 
-// Install the list of problems.
-//json('/dataset/list', problems => {
-  //store.dispatch(action.setProblemList(problems));
-//});
+
+// repond to changes in the config and update the dataset schema and the data itself.  This is accomplished by
+// observing for changes in the config component of the Redux store and calling a tangelo service to
+// read the data
+
+observeStore(next => {
+  const immConfig = next.getIn(['config']);
+  console.log('observe store - config changed')
+  // load the data
+  //json('/database/data', data_contents => {
+  //    store.dispatch(action.setActiveData(data_contents));
+  //    store.dispatch(action.setDataSchema(immConfig['dataset_schema']));
+  //    console.log('data returned from service:',store.getState().getIn(['data','data']))
+  //}); 
+}, s => s.getIn(['config']));
+
+
+// build a list of variables from the data, once it is set
+observeStore(next => {
+  console.log('observe store - data,data changed');
+  // load the data
+  //json('/database/listfeatures', features => {
+  //    store.dispatch(action.setVariables(features));
+  //    console.log('data returned from service:',store.getState().getIn(['vars']))
+  //}); 
+}, s => s.getIn(['data','data']));
+
+
 
 // Install the model choices.
 // let modelDropdown = new Dropdown(select('#modeldropdown').node(), {
@@ -62,6 +100,14 @@ select(document.body).html(body());
   // 'quadratic',
   // 'loess'
 // ]);
+
+
+
+
+
+
+
+
 
 // Install the TA2 options.
 let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
@@ -120,6 +166,8 @@ select('button.train').on('click', () => {
       query.push(`${x}=${params[x]}`);
     }
   }
+
+  // perform pipeline call to TA2
   const url = `/pipeline?${query.join('&')}`;
   json(url).post({}, resp => {
     resp = resp.filter(x => x.progressInfo === 'COMPLETED');
@@ -130,7 +178,12 @@ select('button.train').on('click', () => {
   });
 });
 
-// When the active data changes, populate the variables panel.
+
+
+// When the active data changes, populate the variables panel. Observe changes to the data
+// component of the store. 
+
+/*
 observeStore(next => {
   const immData = next.getIn(['data', 'data']);
 
@@ -159,6 +212,8 @@ observeStore(next => {
   // infinite loop for some reason.
   window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
 }, s => s.getIn(['data', 'data']));
+*/
+
 
 let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
   buttonText: 'x',
@@ -289,10 +344,14 @@ let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
     });
   }
 });
+
+/*
 observeStore(next => {
   const problems = next.get('problems').toJS();
   problemDropdown.setItems(problems, d => d.problemId);
 }, s => s.get('problems'));
+*/
+
 
 // When the list of derived log transform variables changes, update the
 // clickable state of the log transform buttons, and the list of log-variable
@@ -394,8 +453,11 @@ observeStore(next => {
   }
 }, s => s.get('exploratoryVis'));
 
+
+
 // add a row of scatterplots ; show plots for all variables against the trainingVariable
-// When the exploratory vis matrix variables change, update the row of plots 
+// When the exploratory vis matrix variables change, update the row of plots.  This ignores 
+// any discrete plots, because it doesn't have logic to handle one or both variables being discrete
 
 observeStore(next => {
   const exploratoryVisMatrix = next.get('exploratoryVisMatrix');
@@ -611,6 +673,9 @@ observeStore((next, last) => {
     });
   }
 }, s => s.getIn(['modeling', 'inputVars']));
+
+
+
 
 observeStore(next => {
   const pipelines = next.getIn(['ta2', 'pipelines']).toJS();

@@ -47,6 +47,25 @@ def createPipeline(port=None, session=None, data=None, predictor=None, response=
     predictor = json.loads(predictor)
     response = json.loads(response)
 
+
+"""
+message PipelineCreateRequest {
+    SessionContext context = 1;
+    string dataset_uri = 2;                     // URI pointing to a raw CSV file, or datasetDoc.json (indicating a D3M dataset).
+    TaskType task = 3;
+    TaskSubtype task_subtype = 4;               // can be set to NONE = 1
+    string task_description = 5;                // textual description of the task, if available
+    OutputType output = 6;
+    repeated PerformanceMetric metrics = 7;     // specify a list of evaluation metrics
+    repeated Feature target_features = 8; // specify a list of targets to predict
+    repeated Feature predict_features = 9;// specify a list of predictor features to possibly include in model.  If omitted, use all features located in dataset_uri.
+    int32 max_pipelines = 10;                   // optional maximum number of pipelines to return
+                                                // Note that TA2 may still return more pipelines, so TA3 should keep a list
+                                                // of the top results sorted by the relevant metric if required
+}
+"""
+
+
     resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=Parse(session, cpb.SessionContext()),
                                                           train_features=[cpb.Feature(feature_id=pred,
                                                                                       data_uri=data_uri) for pred in predictor],

@@ -3,3 +3,5 @@ grpcio-tools==1.6.0
 tangelo==0.10.0
 rpy2==2.8.6
 psutil==5.4.3
+numpy==1.14.0
+pandas==0.22.0

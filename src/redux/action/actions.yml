@@ -6,10 +6,10 @@ setProblemList:
 
 setActiveData:
   - data
-  - name
-  - path
-  - meta
 
+setDataSchema:
+  - schema
+  
 setVariables:
   - variables
 

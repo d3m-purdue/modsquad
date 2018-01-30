@@ -2,15 +2,18 @@ import Immutable from 'immutable';
 
 import { actionType } from '../action';
 
+// data = actual list of dictionaries;
+// name = dataset name
+// mode = 'train' or 'test'
+// path = 'path to datasetDoc.json'
+
 const initial = Immutable.fromJS({
   config: null,
-  data: {
-    data: null,
-    name: null,
-    path: null,
-    meta: null
+  data: [],
+  problem: {
+    schema: null,
+    taskType: null
   },
-  problems: [],
   vars: [],
   logVars: [],
   exploratoryVis: {
@@ -47,17 +50,21 @@ const reducer = (state = initial, action = {}) => {
       newState = state.set('config', Immutable.fromJS(action.config));
       break;
 
-    case actionType.setProblemList:
-      newState = state.set('problems', Immutable.fromJS(action.problems));
+    case actionType.setProblem:
+      newState = state.set('problem', Immutable.fromJS(action.problem));
       break;
 
-    case actionType.setActiveData:
+    // new for Jan18 - called when problem config changes
+    case actionType.setDataSchema:
       newState = state.withMutations(s => {
-        s.setIn(['data', 'data'], Immutable.fromJS(action.data));
-        s.setIn(['data', 'name'], action.file);
-        s.setIn(['data', 'path'], action.path);
-        s.setIn(['data', 'meta'], Immutable.fromJS(action.meta));
+        s.setIn(['data', 'schema'], Immutable.fromJS(action.schema));
+
       });
+      break;
+
+    // modified for Jan18
+    case actionType.setActiveData:
+      newState = state.set(['data'], Immutable.fromJS(action.data));
       break;
 
     case actionType.setVariables:

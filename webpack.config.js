@@ -55,7 +55,7 @@ module.exports = candelaLoaders({
         exclude: /node_modules/,
         use: [
           'json-loader',
-          'yaml-loader'
+          'yaml-loader' 
         ]
       }
     ]
@@ -81,7 +81,8 @@ module.exports = candelaLoaders({
       { from: 'src/tangelo/stopProcess.py', to: 'stopProcess.py' },      
       { from: 'src/ta3_quit.py', to: 'ta3_quit.py' },
       { from: 'src/tangelo/core_pb2.py', to: 'core_pb2.py' },
-      { from: 'src/tangelo/core_pb2_grpc.py', to: 'core_pb2_grpc.py' }
+      { from: 'src/tangelo/core_pb2_grpc.py', to: 'core_pb2_grpc.py' },
+      { from: 'src/tangelo/d3mds.py', to: 'd3mds.py' }
     ])
   ]
 });
