@@ -138,6 +138,8 @@ const reducer = (state = initial, action = {}) => {
       newState = state.setIn(['ta2', 'inputs', 'response'], Immutable.fromJS(action.var));
       break;
 
+    // it looks like the ta2ta3 api is changing here, so it might be used inconsistently, try
+    // to catch both possibilities  (sessionId and session_id )
     case actionType.setTA2Session:
       newState = state.setIn(['ta2', 'session'], Immutable.fromJS(action.sessionId));
       break;
