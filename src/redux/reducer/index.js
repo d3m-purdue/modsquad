@@ -9,7 +9,10 @@ import { actionType } from '../action';
 
 const initial = Immutable.fromJS({
   config: null,
-  data: [],
+  data: {
+    data: null,
+    schema: null
+  },
   problem: {
     schema: null,
     taskType: null
@@ -64,7 +67,7 @@ const reducer = (state = initial, action = {}) => {
 
     // modified for Jan18
     case actionType.setActiveData:
-      newState = state.set(['data'], Immutable.fromJS(action.data));
+      newState = state.setIn(['data','data'], Immutable.fromJS(action.data));
       break;
 
     case actionType.setVariables:

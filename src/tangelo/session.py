@@ -9,7 +9,7 @@ version = cpb.DESCRIPTOR.GetOptions().Extensions[cpb.protocol_version]
 
 @tangelo.restful
 def post(port=None):
-    channel = grpc.insecure_channel('localhost:%d' % (int(port)))
+    channel = grpc.insecure_channel('0.0.0.0:%d' % (int(port)))
     stub = CoreStub(channel)
 
     resp = stub.StartSession(cpb.SessionRequest(user_agent='modsquad',

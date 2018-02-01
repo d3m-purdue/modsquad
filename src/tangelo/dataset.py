@@ -21,15 +21,18 @@ def getDataset():
     problem_schema_path = os.environ.get('PROBLEM_SCHEMA_PATH')
     dataset_schema_path = os.environ.get('DATASET_SCHEMA_PATH')
     datasupply = d3mds.D3MDS(dataset_schema_path,problem_schema_path)
-    train_data_as_df = datasupply.get_train_data()
+    # fill nan with zeros, or should it be empty strings?
+    train_data_as_df = datasupply.get_train_data().fillna(0)
     list_of_dicts = copy.deepcopy(train_data_as_df.T.to_dict().values())
-    #print 'train data excerpt: ',list_of_dicts[0:2]
+    #print 'train data excerpt: ',list_of_dicts
+    #print 'end of data'
     return list_of_dicts
 
 def listDatasetFeatures():       
     featurelist = []
     # get the data handy by reading it
     dataset = getDataset()
+
     # Iterate over first entry, assuming the data is uniform ( no missing fields)
     for feat in dataset[0].keys():
         featurelist.append(feat)

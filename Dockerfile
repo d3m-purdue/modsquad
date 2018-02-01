@@ -1,11 +1,18 @@
 FROM r-base:3.4.1
 
+# for web
 EXPOSE 80
 
+# for connection with TA2
+EXPOSE 45042
+
+
 RUN apt-get update
-RUN apt-get install -y git curl sudo python2.7 python2.7-dev gnupg1 python-pip libcairo2-dev
+RUN apt-get install -y git curl sudo python2.7 python2.7-dev python-pip libcairo2-dev  gnupg1 
+# (not supported on python:2 base, but needed on r-base)
 
 # Install Node.js 6
+# build from python 2 based required removal npm from install line with nodejs below
 RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash - \
   && sudo apt-get install -y nodejs npm \
   && sudo npm install -g npm \
@@ -25,10 +32,12 @@ RUN npm run pythonprep
 RUN npm run protobuf
 RUN npm run build
 
-ENTRYPOINT npm run serve -- -np --host=0.0.0.0
+RUN useradd tangelo
+
+ENTRYPOINT npm run serve 
 
 # from NIST - ta3_search for non-interactive shells
-RUN echo '#!/bin/bash cd /d3m-ta3; npm run serve -- -np --host=0.0.0.0'  > /usr/bin/ta3_search
+RUN echo '#!/bin/bash cd /d3m-ta3; npm run serve -- -p --host=0.0.0.0'  > /usr/bin/ta3_search
 RUN chmod +x /usr/bin/ta3_search
 
 # quit command

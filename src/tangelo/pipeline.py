@@ -33,16 +33,15 @@ def toConstCase(s):
 
 
 def get_stub(port):
-    channel = grpc.insecure_channel('localhost:%d' % (int(port)))
+    channel = grpc.insecure_channel('0.0.0.0:%d' % (int(port)))
     stub = CoreStub(channel)
 
     return stub
 
 
-def createPipeline(port=None, session=None, data=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None, metric=None):
+def createPipeline(port=None, session=None, data_uri=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None, metric=None):
     stub = get_stub(int(port))
 
-    data_uri = 'file://%s' % (data)
 
     predictor = json.loads(predictor)
     response = json.loads(response)
@@ -67,15 +66,16 @@ message PipelineCreateRequest {
 
 
     resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=Parse(session, cpb.SessionContext()),
-                                                          train_features=[cpb.Feature(feature_id=pred,
-                                                                                      data_uri=data_uri) for pred in predictor],
-                                                          target_features=[cpb.Feature(feature_id=targ,
-                                                                                       data_uri=data_uri) for targ in response],
+                                                          dataset_uri=
                                                           task=cpb.TaskType.Value(task_type.upper()),
                                                           task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
                                                           output=cpb.OutputType.Value(toConstCase(output_type)),
                                                           metrics=[cpb.Metric.Value(toConstCase(metric))],
                                                           task_description='TA2 pipeline creation',
+                                                          target_features=[cpb.Feature(feature_id=targ,
+                                                                                       data_uri=data_uri) for targ in response],                                                       
+                                                          predict_features=[cpb.Feature(feature_id=pred,
+                                                                                      data_uri=data_uri) for pred in predictor],
                                                           max_pipelines=5))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)

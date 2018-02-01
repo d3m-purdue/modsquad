@@ -26,6 +26,10 @@ import models from './tangelo/models.yml';
 import stoppingTemplate from './template/stopping.jade';
 import stopProcess from './util/stopProcess';
 
+// KLUDGE - evil mount of a function, so it is visible from a call
+// in the Pug template (a quit button on the GUI)
+window.stopProcess = stopProcess;
+
 // kludge of store because Redux wasn't cooperating
 var storage = {}
 storage.dataset = []
@@ -40,20 +44,16 @@ const md = new Remarkable();
 // Read in the NIST config file.
 json('/config', cfg => {
   store.dispatch(action.setConfig(cfg));
-  //immConfig = store.getIn(['config'])
+  
   // now that we have the config information, look up the datasets
-  json('/dataset/data', data_contents => {
-      storage.dataset = jQuery.extend({},data_contents)
-      storage.schema = jQuery.extend({},cfg['dataset_schema'])
-      store.dispatch(action.setActiveData(storage.dataset));
-      store.dispatch(action.setDataSchema(cfg['dataset_schema']));
-      //console.log('data returned from service:',store.getState().getIn(['data','data']))
-      json('/dataset/listfeatures', features => {
-        store.dispatch(action.setVariables(features));
-        console.log('data returned from service:',features)
-      }); 
-    }); 
+  json('/dataset/data', (error,data_contents) => {
+    //console.log('ajax return:',data_contents)
+    store.dispatch(action.setActiveData(data_contents));
+    store.dispatch(action.setDataSchema(cfg['dataset_schema'])); 
+  });
 });
+
+
 
 
 // Install the content template.
@@ -183,7 +183,7 @@ select('button.train').on('click', () => {
 // When the active data changes, populate the variables panel. Observe changes to the data
 // component of the store. 
 
-/*
+
 observeStore(next => {
   const immData = next.getIn(['data', 'data']);
 
@@ -212,7 +212,7 @@ observeStore(next => {
   // infinite loop for some reason.
   window.setTimeout(() => store.dispatch(action.setVariables(vars)), 0);
 }, s => s.getIn(['data', 'data']));
-*/
+
 
 
 let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
