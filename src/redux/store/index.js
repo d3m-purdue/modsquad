@@ -11,7 +11,9 @@ const logger = createLogger({
   collapsed: () => true,
   diff: true
 });
-const store = createStore(reducer, applyMiddleware(thunk, promise, logger));
+const store = createStore(reducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
+  applyMiddleware(thunk, promise, logger));
 
 // Taken from https://github.com/reactjs/redux/issues/303#issuecomment-125184409
 //

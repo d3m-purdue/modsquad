@@ -6,6 +6,8 @@ import { select,
 import { json } from 'd3-request';
 import dl from 'datalib';
 import Remarkable from 'remarkable';
+// import * as vl from 'vega-lite';
+// import * as vegaEmbed from 'vega-embed'
 
 import { action,
          store,
@@ -54,10 +56,10 @@ json('/config', cfg => {
 
   // now that we have the config information, store the problems to be solved
   json('/dataset/problems', (error,problem_contents) => {
-    console.log('ajax return:',problem_contents)
+    console.log('ajax return:', problem_contents)
     //store.dispatch(action.setProblemDescription(problem_contents['description']));
     store.dispatch(action.setProblemId(problem_contents[0]['problemId']));
-    store.dispatch(action.setProblemTaskType(problem_contents[0]['taskType'])); 
+    store.dispatch(action.setProblemTaskType(problem_contents[0]['taskType']));
     store.dispatch(action.setProblemTaskSubType(problem_contents[0]['taskSubType']));
     store.dispatch(action.setProblemMetrics(problem_contents[0]['metrics']));
     store.dispatch(action.setProblemTargetFeatures(problem_contents[0]['targets']));
@@ -146,7 +148,7 @@ select('button.train').on('click', () => {
   // disabling dynamic discovery for now because it is being set during evaluitions
   //const model = ta2.get('model');
   //const port = model.get('port');
- 
+
   const data_uri = store.getState().getIn(['data', 'data']);
   const task_type = store.getState().getIn(['problems', 'tasktype']);
   const task_subtype = store.getState().getIn(['problems', 'tasksubtype']);
@@ -169,7 +171,7 @@ select('button.train').on('click', () => {
     max_pipelines
   };
   console.log('pipeline params:',params)
-  
+
   let query = [];
   for (let x in params) {
     if (params.hasOwnProperty(x)) {
@@ -225,13 +227,14 @@ observeStore(next => {
 
 
 
-let yVarDropdown = new Dropdown(select('#x-dropdown').node(), {
+let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
   buttonText: 'Target Variable',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(0, item));
     store.dispatch(action.setExploratoryVarMatrix(0, item));
   }
 });
+
 
 //let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
 //  buttonText: 'y',
@@ -242,9 +245,15 @@ let yVarDropdown = new Dropdown(select('#x-dropdown').node(), {
 
 const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
-
+  const colIndex = store.getState().getIn(['problem', 'targets', 0, 'colIndex']);
   // Fill the variable menus in the exploratory vis section.
-  yVarDropdown.setItems(vars, d => d.name);
+  yVarDropdown.setItems(vars, (d, i) => {
+    let nm = d.name;
+    if (i === colIndex) {
+      nm = `${nm} *`;
+    }
+    return nm;
+  });
   //yVarDropdown.setItems(vars, d => d.name);
 };
 
@@ -336,24 +345,24 @@ observeStore(next => {
     });
 }, s => s.get('vars'));
 
-// When the list of problems changes, populate the problems tab menu.
-let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
-  buttonText: 'Problem',
-  onSelect: prob => {
-    select('.description')
-      .html(md.render(prob.description));
+// // When the list of problems changes, populate the problems tab menu.
+// let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
+//   buttonText: 'Problem',
+//   onSelect: prob => {
+//     select('.description')
+//       .html(md.render(prob.description));
 
-    select('.metadata')
-      .append(d => stringToElement(metadataTemplate({
-        metadata: prob.metadata
-      })));
+//     select('.metadata')
+//       .append(d => stringToElement(metadataTemplate({
+//         metadata: prob.metadata
+//       })));
 
-    //json(`/dataset/data/${prob.dataFile}`, data => {
-    json('/dataset/datatesting', data => {
-      store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
-    });
-  }
-});
+//     //json(`/dataset/data/${prob.dataFile}`, data => {
+//     json('/dataset/datatesting', data => {
+//       store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
+//     });
+//   }
+// });
 
 /*
 observeStore(next => {
@@ -522,7 +531,7 @@ observeStore(next => {
 
       if ((vars[featureIndex].name != yVar.name) &&
           (vars[featureIndex].name != 'd3mIndex') &&
-	  (determineVariableType(vars[featureIndex].data).type=='number')) {
+	        (determineVariableType(vars[featureIndex].data).type=='number')) {
 
         // fill the yVar object
         const data = yVar.data.map((d, i) => ({
@@ -530,6 +539,18 @@ observeStore(next => {
           [vars[featureIndex].name]: vars[featureIndex].data[i],
           name: d
         }));
+
+        // use vega-lite instead of candela because we need more flexibility
+        // (need scales to not always include zero)
+        const pspec = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+            "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+          }
+        }
 
         // add a new Div inside the #scatterplotmatrix element
         jQuery('<h5/>', {
@@ -541,20 +562,173 @@ observeStore(next => {
 
         // create a new plot for this variable combination
         var plotElement = document.getElementById(vars[featureIndex].name)
-        const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-          data,
-          x: vars[featureIndex].name,
-          y: yVar.name,
-          width: 400*plotSizeScale,
-          height: 400*plotSizeScale
-        });
-        vismatrix.render();
+        vegaEmbed("#" + vars[featureIndex].name, pspec,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 2,
+            "width": 400*plotSizeScale / 2
+          });
+
+        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        //   data,
+        //   x: vars[featureIndex].name,
+        //   y: yVar.name,
+        //   width: 400*plotSizeScale,
+        //   height: 400*plotSizeScale
+        // });
+        // vismatrix.render();
       }
     }
   }
 
 }, s => s.get('exploratoryVisMatrix'));
 
+// This should really be triggered by the model being run --
+// not a user clicking a button
+select('button#run-post-vis').on('click', () => {
+  const immData = store.getState().getIn(['data', 'data']);
+
+  if (!immData) {
+    return;
+  }
+
+  const data = immData.toJS();
+  const names = Object.keys(data[0]);
+
+  // need to sort the data on the target so the lines that we draw will be connecting
+  // points in the right order - note that target is hard-coded as "Hits" for now
+  function compare(a,b) {
+    if (a.Hits < b.Hits)
+      return -1;
+    if (a.Hits > b.Hits)
+      return 1;
+    return 0;
+  }
+  data.sort(compare);
+
+  // Gather up the features as separate entries in a vars list
+  const vars = names.map(name => ({
+    name,
+    data: data.map(datum => datum[name])
+  }));
+
+  const yVar = vars[0]; // hard coded to "hits" for now but this should be the target variable
+  // (I would grab it from the problem target but for the baseball data it's categorical)
+  // const target = store.getState().getIn(['problem', 'targets', 0]);
+
+  // also hard-coding a prediction and residual variable, but this should come from ta2
+  const predVar = {
+    name: "predicted",
+    data: data.map(d => d.At_bats / 4)
+  };
+  const residVar = {
+    name: "residuals",
+    data: data.map(d => d.Hits - d.At_bats / 4)
+  };
+
+  // If the modeling variable is filled display a row of scatterplots
+  if (yVar) {
+
+    // clear out the previous display
+    const elmatrix = select('#scatterplotmatrix2');
+    elmatrix.selectAll('*')
+      .remove();
+
+    // loop through the features and draw a plot for each feature compared to the modeling feature
+    for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
+
+      // ignore the case where the modeling feature is plotted against itself
+      // also ignore cases where the Y feature is non-numeric by testing using a heuristic
+      // and where the feature is an internal d3mIndex added to all datasets, this would confuse
+      // a problem-oriented user
+
+      if ((vars[featureIndex].name != yVar.name) &&
+          (vars[featureIndex].name != 'd3mIndex') &&
+          (determineVariableType(vars[featureIndex].data).type=='number')) {
+
+        // fill the yVar object
+        const data = yVar.data.map((d, i) => ({
+          [yVar.name]: yVar.data[i],
+          [vars[featureIndex].name]: vars[featureIndex].data[i],
+          pred: predVar.data[i],
+          resid: residVar.data[i],
+          name: d
+        }));
+
+        // use vega-lite instead of candela because we need more flexibility
+        // (need scales to not always include zero)
+        const pspec = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "layer": [{
+            "mark": "point",
+            "encoding": {
+              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+              "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+            }
+          }, {
+            "mark": "line",
+            "encoding": {
+              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+              "y": {"field": "pred", "type": "quantitative", "scale": {"zero": false}},
+              "color": {"value": "black"}
+            }
+          }]
+        }
+
+        const pspec2 = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+            "y": {"field": "resid", "type": "quantitative", "scale": {"zero": false}}
+          }
+        }
+
+        // add a new Div inside the #scatterplotmatrix element
+        jQuery('<h5/>', {
+          text: vars[featureIndex].name,
+          css: { "clear": "both" },
+          }).appendTo('#scatterplotmatrix2');
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-cont",
+          }).appendTo('#scatterplotmatrix2');
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-pred",
+          css: { "float": "left" },
+          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-resid",
+          css: { "float": "left" },
+          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+
+        // create a new plot for this variable combination
+        vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 3,
+            "width": 400*plotSizeScale / 3
+          });
+        vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 3,
+            "width": 400*plotSizeScale / 3
+          });
+
+        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        //   data,
+        //   x: vars[featureIndex].name,
+        //   y: yVar.name,
+        //   width: 400*plotSizeScale,
+        //   height: 400*plotSizeScale
+        // });
+        // vismatrix.render();
+      }
+    }
+  }
+});
 
 
 // When the model changes, update the input variables.
@@ -702,8 +876,8 @@ observeStore(next => {
     })));
 
   // when the predict button is selected, then connect to the TA2 by calling a tangelo service
-  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are 
-  // gathered here,  packed into a query object, and sent to the service. 
+  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are
+  // gathered here,  packed into a query object, and sent to the service.
 
   const predict = panels.select('.predict')
     .on('click', d => {
