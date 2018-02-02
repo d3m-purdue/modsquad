@@ -1,7 +1,6 @@
 import Immutable from 'immutable';
 
 import { actionType } from '../action';
-
 // data = actual list of dictionaries;
 // name = dataset name
 // mode = 'train' or 'test'
@@ -66,11 +65,11 @@ const reducer = (state = initial, action = {}) => {
       break;
 
     case actionType.setProblemTaskType:
-      newState = state.setIn(['problem','tasktype'], Immutable.fromJS(action.taskType));
+      newState = state.setIn(['problem','tasktype'], Immutable.fromJS(action.tasktype));
       break;
 
     case actionType.setProblemTaskSubType:
-      newState = state.setIn(['problem','tasksubtype'], Immutable.fromJS(action.taskSubType));
+      newState = state.setIn(['problem','tasksubtype'], Immutable.fromJS(action.tasksubtype));
       break;
 
     case actionType.setProblemMetrics:

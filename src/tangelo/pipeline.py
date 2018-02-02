@@ -6,6 +6,7 @@ import re
 import tangelo
 import time
 import os
+import d3mds
 
 import core_pb2 as core_pb2
 import core_pb2_grpc as core_pb2_grpc
@@ -51,33 +52,46 @@ def get_stub():
 def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=None, target_features=None, predict_features=[],metrics=None,max_pipelines=10):
 
   stub = get_stub()
-  task = cpb.TaskType.Value(task_type.upper())
-  taskSubtype = cpb.TaskSubtype.Value(toConstCase(task_subtype))
-
-  #metrics = cpb.Metric.Value(toConstCase(metrics))
-  metrics=[
-    core_pb2.ACCURACY,
-    core_pb2.ROC_AUC,
-    core_pb2.F1,
-    core_pb2.ROOT_MEAN_SQUARED_ERROR
-  ]
-
-  print target_features
-
+  #task = cpb.TaskType.Value(task_type.upper())
+  #taskSubtype = cpb.TaskSubtype.Value(toConstCase(task_subtype))
   
+  problem_schema_path = os.environ.get('PROBLEM_ROOT')
+  problem_supply = d3mds.D3MProblem(problem_schema_path)
+  targets =  problem_supply.get_targets()
+  #metrics = problem_supply.get_performance_metrics()
+  #task = problem_supply.get_taskType()
+  #tasksubtype = problem_supply.get_taskSubType()
   
+  features = []
+  for entry in targets:
+    tf = core_pb2.Feature(resource_id=entry['resID'],feature_name=entry['colName'])
+    features.append(tf)
+
+  task = core_pb2.REGRESSION
+  tasksubtype = core_pb2.UNIVARIATE
+
   #targets = [cpb.Feature(resource_id=targ['targetIndex'],feature_name=targ['colName']) for targ in target_features]
-  targets = [core_pb2.Feature(resource_id='0',feature_name='out1')]
+  #targets = [core_pb2.Feature(resource_id='0',feature_name='out1')]
+  
+  # the metrics are imprecise text versions of the enumerations, so just standardize
+  metrics=[
+            core_pb2.ACCURACY,
+            core_pb2.ROC_AUC,
+            core_pb2.F1
+        ],
 
-  resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=(cpb.SessionContext(context)),
+  context_in = cpb.SessionContext(session_id=context)
+
+  request_in =  cpb.PipelineCreateRequest(context=context_in,
                                                           dataset_uri=data_uri,
                                                           task=task,
-                                                          task_subtype=taskSubtype,
+                                                          task_subtype=tasksubtype,
                                                           metrics=metrics,
                                                           task_description='Modsquad pipeline create request',
-                                                          target_features=targets,                                                       
+                                                          target_features=features,                                                       
                                                           predict_features=[],
-                                                          max_pipelines=10))
+                                                          max_pipelines=10)
+  resp = stub.CreatePipelines(request_in)
 
   return map(lambda x: json.loads(MessageToJson(x)), resp)
 

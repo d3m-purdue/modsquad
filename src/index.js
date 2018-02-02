@@ -149,27 +149,23 @@ select('button.train').on('click', () => {
   //const model = ta2.get('model');
   //const port = model.get('port');
 
- 
   const data_uri = store.getState().getIn(['data', 'schema']);
-  //const task_type = store.getState().getIn(['problem', 'tasktype']).toJS();
-  //const task_subtype = store.getState().getIn(['problem', 'tasksubtype']).toJS();
-  const task_type = 'regression'
-  const task_subtype = 'univariate'
+
   const target_features = store.getState().getIn(['problem', 'targets']).toJS();
   // predict_features is currently ignored.  Later user will be able to select features to use
   // during prediction
   const predict_features = [];
   const metrics = store.getState().getIn(['problem', 'metrics']).toJS();
   const max_pipelines = 10;
-  const context = store.getState().getIn(['ta2','session','context']).toJS()
+  const context = store.getState().getIn(['ta2','session','context']).toJS()['sessionId']
   console.log('context:',context)
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {
     context,
     data_uri,
-    task_type,
-    task_subtype,
+    //task_type,
+    //task_subtype,
     metrics,
     target_features,
     predict_features,
@@ -471,8 +467,7 @@ observeStore(next => {
       y: 'y',
       opacity: 0.9,
       width: 400*plotSizeScale,
-      height: 300*plotSizeScale
-    });
+p    });
     vis.render();
   }
 }, s => s.get('exploratoryVis'));
