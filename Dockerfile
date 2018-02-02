@@ -37,7 +37,9 @@ RUN useradd tangelo
 ENTRYPOINT npm run serve 
 
 # from NIST - ta3_search for non-interactive shells
-RUN echo '#!/bin/bash cd /d3m-ta3; npm run serve -- -p --host=0.0.0.0'  > /usr/bin/ta3_search
+RUN echo '#!/bin/bash' > /usr/bin/ta3_search 
+RUN echo 'cd /d3m-ta3' >> /usr/bin/ta3_search
+RUN echo '/usr/local/bin/npm run serve'  >> /usr/bin/ta3_search
 RUN chmod +x /usr/bin/ta3_search
 
 # quit command
