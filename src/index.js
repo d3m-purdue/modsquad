@@ -34,7 +34,7 @@ window.stopProcess = stopProcess;
 var storage = {}
 storage.dataset = []
 storage.schema = null
- 
+
 // easy way to rescale the embedded plot dimensions, while preserving aspect ratio
 const plotSizeScale = 2.5
 
@@ -44,12 +44,12 @@ const md = new Remarkable();
 // Read in the NIST config file.
 json('/config', cfg => {
   store.dispatch(action.setConfig(cfg));
-  
+
   // now that we have the config information, look up the datasets
   json('/dataset/data', (error,data_contents) => {
     //console.log('ajax return:',data_contents)
     store.dispatch(action.setActiveData(data_contents));
-    store.dispatch(action.setDataSchema(cfg['dataset_schema'])); 
+    store.dispatch(action.setDataSchema(cfg['dataset_schema']));
   });
 });
 
@@ -72,7 +72,7 @@ observeStore(next => {
   //    store.dispatch(action.setActiveData(data_contents));
   //    store.dispatch(action.setDataSchema(immConfig['dataset_schema']));
   //    console.log('data returned from service:',store.getState().getIn(['data','data']))
-  //}); 
+  //});
 }, s => s.getIn(['config']));
 
 
@@ -83,7 +83,7 @@ observeStore(next => {
   //json('/database/listfeatures', features => {
   //    store.dispatch(action.setVariables(features));
   //    console.log('data returned from service:',store.getState().getIn(['vars']))
-  //}); 
+  //});
 }, s => s.getIn(['data','data']));
 
 
@@ -181,7 +181,7 @@ select('button.train').on('click', () => {
 
 
 // When the active data changes, populate the variables panel. Observe changes to the data
-// component of the store. 
+// component of the store.
 
 
 observeStore(next => {
@@ -216,7 +216,7 @@ observeStore(next => {
 
 
 let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
-  buttonText: 'x',
+  buttonText: 'Target Variable',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(0, item));
     store.dispatch(action.setExploratoryVarMatrix(0, item));
@@ -243,7 +243,7 @@ const varsChanged = (origVars, logVars) => {
 // This routine is a heuristic to determine if a feature is numeric or string and continuous
 // or discrete.  The type of the variable is examined first, but numbers might be represented
 // as strings, like '345', so an attempt is made to convert to numbers.  If the number of different
-// values is < 70% of the length of the examined array, the feature is assumed to be discrete. 
+// values is < 70% of the length of the examined array, the feature is assumed to be discrete.
 
 function determineVariableType(variable) {
   let uniqueValues = 0
@@ -262,7 +262,7 @@ function determineVariableType(variable) {
     }
     if (values.includes(variable[i])== false) {
       values.push(variable[i])
-    } 
+    }
   }
   //console.log('stringcount',stringCount, 'numberCount',numberCount,'values',values)
   let outRec = {}
@@ -273,7 +273,7 @@ function determineVariableType(variable) {
 
 
 // Draw the plots of each variable inside their collapsible buttons
-// Candela plots are added for each variable.  
+// Candela plots are added for each variable.
 
 observeStore(next => {
   const vars = next.get('vars').toJS();
@@ -456,7 +456,7 @@ observeStore(next => {
 
 
 // add a row of scatterplots ; show plots for all variables against the trainingVariable
-// When the exploratory vis matrix variables change, update the row of plots.  This ignores 
+// When the exploratory vis matrix variables change, update the row of plots.  This ignores
 // any discrete plots, because it doesn't have logic to handle one or both variables being discrete
 
 observeStore(next => {
@@ -476,7 +476,7 @@ observeStore(next => {
   // each feature
 
   // TODO: It would have been better to pass in the inputVars, but I wasn't sure how to get
-  // them automatically updated, so just pull them from the store below. 
+  // them automatically updated, so just pull them from the store below.
 
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
@@ -488,14 +488,14 @@ observeStore(next => {
   const data = immData.toJS();
   const names = Object.keys(data[0]);
 
-  // Gather up the features as separate entries in a vars list 
+  // Gather up the features as separate entries in a vars list
   const vars = names.map(name => ({
     name,
     data: data.map(datum => datum[name])
   }));
 
   // If the modeling variable is filled display a row of scatterplots
-  if (yVar  ) {
+  if (yVar) {
 
     // clear out the previous display
     const elmatrix = select('#scatterplotmatrix');
@@ -510,15 +510,15 @@ observeStore(next => {
       // and where the feature is an internal d3mIndex added to all datasets, this would confuse
       // a problem-oriented user
 
-      if ((vars[featureIndex].name != yVar.name) && 
+      if ((vars[featureIndex].name != yVar.name) &&
           (vars[featureIndex].name != 'd3mIndex') &&
 	  (determineVariableType(vars[featureIndex].data).type=='number')) {
 
         // fill the yVar object
         const data = yVar.data.map((d, i) => ({
-          x: yVar.data[i],
-          y: vars[featureIndex].data[i],
-          name: d 
+          [yVar.name]: yVar.data[i],
+          [vars[featureIndex].name]: vars[featureIndex].data[i],
+          name: d
         }));
 
         // add a new Div inside the #scatterplotmatrix element
@@ -533,8 +533,8 @@ observeStore(next => {
         var plotElement = document.getElementById(vars[featureIndex].name)
         const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
           data,
-          x: 'x',
-          y: 'y', 
+          x: vars[featureIndex].name,
+          y: yVar.name,
           width: 400*plotSizeScale,
           height: 400*plotSizeScale
         });
