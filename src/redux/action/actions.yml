@@ -1,8 +1,20 @@
 setConfig:
   - config
 
-setProblemList:
-  - problems
+setProblemTaskType:
+  - taskType
+
+setProblemTaskSubType:
+  - taskSubType
+
+setProblemMetrics:
+  - metrics
+
+setProblemId:
+  - problemId
+
+setProblemTargetFeatures:
+  - targets
 
 setActiveData:
   - data

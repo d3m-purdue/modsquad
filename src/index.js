@@ -51,6 +51,18 @@ json('/config', cfg => {
     store.dispatch(action.setActiveData(data_contents));
     store.dispatch(action.setDataSchema(cfg['dataset_schema']));
   });
+
+  // now that we have the config information, store the problems to be solved
+  json('/dataset/problems', (error,problem_contents) => {
+    console.log('ajax return:',problem_contents)
+    //store.dispatch(action.setProblemDescription(problem_contents['description']));
+    store.dispatch(action.setProblemId(problem_contents[0]['problemId']));
+    store.dispatch(action.setProblemTaskType(problem_contents[0]['taskType'])); 
+    store.dispatch(action.setProblemTaskSubType(problem_contents[0]['taskSubType']));
+    store.dispatch(action.setProblemMetrics(problem_contents[0]['metrics']));
+    store.dispatch(action.setProblemTargetFeatures(problem_contents[0]['targets']));
+  });
+
 });
 
 
@@ -118,6 +130,7 @@ let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
 
     json(`/session?port=${item.port}`)
       .post({}, session => {
+        //console.log('session returned was:',session)
         store.dispatch(action.setTA2Session(session));
       });
 
@@ -129,37 +142,34 @@ ta2Dropdown.setItems(models, d => d.display);
 // Install action for train button.
 select('button.train').on('click', () => {
   const ta2 = store.getState().get('ta2');
-  const session = JSON.stringify(ta2.get('session').toJS().context);
-  const model = ta2.get('model');
-  const port = model.get('port');
-  const predictor = store.getState().getIn(['data', 'meta', 'trainData', 'trainData'])
-    .toJS()
-    .filter(f => f.varRole === 'attribute')
-    // .filter(f => f.varType === 'integer' || f.varType === 'float')
-    .map(f => f.varName);
-  const response = store.getState().getIn(['data', 'meta', 'trainData', 'trainTargets'])
-    .toJS()
-    .filter(f => f.varRole === 'target')
-    // .filter(f => f.varType === 'integer' || f.varType === 'float')
-    .map(f => f.varName);
-  const data = store.getState().getIn(['data', 'path']);
-  const task_type = store.getState().getIn(['problems', 0, 'metadata', 'taskType']);
-  const task_subtype = store.getState().getIn(['problems', 0, 'metadata', 'taskSubType']);
-  const output_type = store.getState().getIn(['problems', 0, 'metadata', 'outputType']);
-  const metric = store.getState().getIn(['problems', 0, 'metadata', 'metric']);
+  const context = JSON.stringify(ta2.get('session').toJS().context);
+  // disabling dynamic discovery for now because it is being set during evaluitions
+  //const model = ta2.get('model');
+  //const port = model.get('port');
+ 
+  const data_uri = store.getState().getIn(['data', 'data']);
+  const task_type = store.getState().getIn(['problems', 'tasktype']);
+  const task_subtype = store.getState().getIn(['problems', 'tasksubtype']);
+  const target_features = store.getState().getIn(['problems', 'targets']);
+  // predict_features is currently ignored.  Later user will be able to select features to use
+  // during prediction
+  const predict_features = [];
+  const metrics = store.getState().getIn(['problems', 'metrics']);
+  const max_pipelines = 10;
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {
-    port,
-    session,
-    data,
-    predictor: JSON.stringify(predictor),
-    response: JSON.stringify(response),
+    context,
+    data_uri,
     task_type,
     task_subtype,
-    output_type,
-    metric
+    metrics,
+    target_features,
+    predict_features,
+    max_pipelines
   };
+  console.log('pipeline params:',params)
+  
   let query = [];
   for (let x in params) {
     if (params.hasOwnProperty(x)) {
@@ -615,6 +625,7 @@ observeStore(next => {
   window.setTimeout(() => store.dispatch(action.setModelInputVars(buttons.map(x => x.variableName))), 0);
 }, s => s.getIn(['modeling', 'model']));
 
+
 // When the modeling vis variables change, update the menus.
 observeStore((next, last) => {
   if (last && last.getIn(['modeling', 'inputVars']) === null) {
@@ -635,6 +646,7 @@ observeStore((next, last) => {
     }
     return x;
   };
+
 
   const inputVars = modeling.toJS();
   const vars = Object.keys(inputVars).map(get);
@@ -676,6 +688,7 @@ observeStore((next, last) => {
 
 
 
+// when the user selects the TA2s to connect to for computation, then create a session and initiate
 
 observeStore(next => {
   const pipelines = next.getIn(['ta2', 'pipelines']).toJS();
@@ -688,6 +701,10 @@ observeStore(next => {
       name: d.id
     })));
 
+  // when the predict button is selected, then connect to the TA2 by calling a tangelo service
+  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are 
+  // gathered here,  packed into a query object, and sent to the service. 
+
   const predict = panels.select('.predict')
     .on('click', d => {
       const ta2 = store.getState().get('ta2');
@@ -699,13 +716,13 @@ observeStore(next => {
         .filter(f => f.varRole === 'attribute')
         .filter(f => f.varType === 'integer' || f.varType === 'float')
         .map(f => f.varName);
-      const data = store.getState().getIn(['data', 'path']);
+      const data_uri = store.getState().getIn(['config'])['dataset_schema']
 
       const params = {
         port,
         session,
         pipeline: d.id,
-        data,
+        data_uri,
         predictor: JSON.stringify(predictor)
       };
 
@@ -727,6 +744,7 @@ observeStore(next => {
       const session = JSON.stringify(ta2.get('session').toJS().context);
       const model = ta2.get('model');
       const port = model.get('port');
+
 
       const params = {
         port,
