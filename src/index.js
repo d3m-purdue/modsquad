@@ -639,6 +639,36 @@ select('button#run-post-vis').on('click', () => {
     elmatrix.selectAll('*')
       .remove();
 
+    const data = yVar.data.map((d, i) => ({
+      Predicted: predVar.data[i],
+      Residuals: residVar.data[i]
+    }));
+
+    const pspec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+      "data": { "values" : data },
+      "mark": "circle",
+      "encoding": {
+        "x": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
+        "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
+      }
+    }
+
+    jQuery('<h5/>', {
+      text: "Residuals vs. Predicted",
+      }).appendTo('#scatterplotmatrix2');
+    jQuery('<div/>', {
+      id: "ta2-pred-resid",
+      }).appendTo('#scatterplotmatrix2');
+
+    // create a new plot for this variable combination
+    vegaEmbed("#ta2-pred-resid", pspec,
+      {
+        "actions": false,
+        "height": 400*plotSizeScale / 3,
+        "width": 400*plotSizeScale / 3
+      });
+
     // loop through the features and draw a plot for each feature compared to the modeling feature
     for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
 
@@ -655,8 +685,8 @@ select('button#run-post-vis').on('click', () => {
         const data = yVar.data.map((d, i) => ({
           [yVar.name]: yVar.data[i],
           [vars[featureIndex].name]: vars[featureIndex].data[i],
-          pred: predVar.data[i],
-          resid: residVar.data[i],
+          Predicted: predVar.data[i],
+          Residuals: residVar.data[i],
           name: d
         }));
 
@@ -671,14 +701,16 @@ select('button#run-post-vis').on('click', () => {
               "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
               "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
             }
-          }, {
-            "mark": "line",
-            "encoding": {
-              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-              "y": {"field": "pred", "type": "quantitative", "scale": {"zero": false}},
-              "color": {"value": "black"}
-            }
-          }]
+          }
+          // , {
+          //   "mark": "line",
+          //   "encoding": {
+          //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+          //     "y": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
+          //     "color": {"value": "black"}
+          //   }
+          // }
+          ]
         }
 
         const pspec2 = {
@@ -687,7 +719,7 @@ select('button#run-post-vis').on('click', () => {
           "mark": "circle",
           "encoding": {
             "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-            "y": {"field": "resid", "type": "quantitative", "scale": {"zero": false}}
+            "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
           }
         }
 
