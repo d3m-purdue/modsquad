@@ -225,7 +225,7 @@ observeStore(next => {
 
 
 
-let xVarDropdown = new Dropdown(select('#x-dropdown').node(), {
+let yVarDropdown = new Dropdown(select('#x-dropdown').node(), {
   buttonText: 'Target Variable',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(0, item));
@@ -244,7 +244,7 @@ const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
 
   // Fill the variable menus in the exploratory vis section.
-  xVarDropdown.setItems(vars, d => d.name);
+  yVarDropdown.setItems(vars, d => d.name);
   //yVarDropdown.setItems(vars, d => d.name);
 };
 

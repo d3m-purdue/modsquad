@@ -5,11 +5,12 @@ nav.navbar.navbar-inverse
       a.navbar-brand ModSquad
 
 ul.nav.nav-tabs
-  li.active: a(href="#welcome" data-toggle="tab" aria-expanded="true") Problems
+  li.active: a(href="#welcome" data-toggle="tab" aria-expanded="true") Welcome
   li: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
   li: a(href="#ta2" data-toggle="tab" aria-expanded="true") TA2
+  //-li: a(href="#post-ta2-vis" data-toggle="tab" aria-expanded="true") Model Output Vis
   //-li: a(href="#modeling" data-toggle="tab" aria-expanded="true") Modeling
   li: a(href="#stopping" data-toggle="tab" aria-expanded="true") Quit
 
@@ -31,6 +32,9 @@ ul.nav.nav-tabs
 
   //-#modeling.tab-pane.fade.in
     //-include template/modeling.jade
+
+  //-#post-ta2-vis.tab-pane.fade.in
+    //-include template/post-ta2-vis.jade
 
   #stopping.tab-pane.fade.in
     include template/stopping.jade
