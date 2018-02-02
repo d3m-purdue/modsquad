@@ -16,8 +16,8 @@ const initial = Immutable.fromJS({
   problem: {
     problemId: null,
     description: null,
-    taskType: null,
-    taskSubType: null,
+    tasktype: null,
+    tasksubtype: null,
     metrics: null,
     targets: []
   },
