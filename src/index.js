@@ -235,6 +235,7 @@ let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
   }
 });
 
+
 //let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
 //  buttonText: 'y',
 //  onSelect: item => {
@@ -530,7 +531,7 @@ observeStore(next => {
 
       if ((vars[featureIndex].name != yVar.name) &&
           (vars[featureIndex].name != 'd3mIndex') &&
-	  (determineVariableType(vars[featureIndex].data).type=='number')) {
+	        (determineVariableType(vars[featureIndex].data).type=='number')) {
 
         // fill the yVar object
         const data = yVar.data.map((d, i) => ({
@@ -582,6 +583,152 @@ observeStore(next => {
 
 }, s => s.get('exploratoryVisMatrix'));
 
+// This should really be triggered by the model being run --
+// not a user clicking a button
+select('button#run-post-vis').on('click', () => {
+  const immData = store.getState().getIn(['data', 'data']);
+
+  if (!immData) {
+    return;
+  }
+
+  const data = immData.toJS();
+  const names = Object.keys(data[0]);
+
+  // need to sort the data on the target so the lines that we draw will be connecting
+  // points in the right order - note that target is hard-coded as "Hits" for now
+  function compare(a,b) {
+    if (a.Hits < b.Hits)
+      return -1;
+    if (a.Hits > b.Hits)
+      return 1;
+    return 0;
+  }
+  data.sort(compare);
+
+  // Gather up the features as separate entries in a vars list
+  const vars = names.map(name => ({
+    name,
+    data: data.map(datum => datum[name])
+  }));
+
+  const yVar = vars[0]; // hard coded to "hits" for now but this should be the target variable
+  // (I would grab it from the problem target but for the baseball data it's categorical)
+  // const target = store.getState().getIn(['problem', 'targets', 0]);
+
+  // also hard-coding a prediction and residual variable, but this should come from ta2
+  const predVar = {
+    name: "predicted",
+    data: data.map(d => d.At_bats / 4)
+  };
+  const residVar = {
+    name: "residuals",
+    data: data.map(d => d.Hits - d.At_bats / 4)
+  };
+
+  // If the modeling variable is filled display a row of scatterplots
+  if (yVar) {
+
+    // clear out the previous display
+    const elmatrix = select('#scatterplotmatrix2');
+    elmatrix.selectAll('*')
+      .remove();
+
+    // loop through the features and draw a plot for each feature compared to the modeling feature
+    for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
+
+      // ignore the case where the modeling feature is plotted against itself
+      // also ignore cases where the Y feature is non-numeric by testing using a heuristic
+      // and where the feature is an internal d3mIndex added to all datasets, this would confuse
+      // a problem-oriented user
+
+      if ((vars[featureIndex].name != yVar.name) &&
+          (vars[featureIndex].name != 'd3mIndex') &&
+          (determineVariableType(vars[featureIndex].data).type=='number')) {
+
+        // fill the yVar object
+        const data = yVar.data.map((d, i) => ({
+          [yVar.name]: yVar.data[i],
+          [vars[featureIndex].name]: vars[featureIndex].data[i],
+          pred: predVar.data[i],
+          resid: residVar.data[i],
+          name: d
+        }));
+
+        // use vega-lite instead of candela because we need more flexibility
+        // (need scales to not always include zero)
+        const pspec = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "layer": [{
+            "mark": "point",
+            "encoding": {
+              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+              "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+            }
+          }, {
+            "mark": "line",
+            "encoding": {
+              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+              "y": {"field": "pred", "type": "quantitative", "scale": {"zero": false}},
+              "color": {"value": "black"}
+            }
+          }]
+        }
+
+        const pspec2 = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+            "y": {"field": "resid", "type": "quantitative", "scale": {"zero": false}}
+          }
+        }
+
+        // add a new Div inside the #scatterplotmatrix element
+        jQuery('<h5/>', {
+          text: vars[featureIndex].name,
+          css: { "clear": "both" },
+          }).appendTo('#scatterplotmatrix2');
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-cont",
+          }).appendTo('#scatterplotmatrix2');
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-pred",
+          css: { "float": "left" },
+          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+        jQuery('<div/>', {
+          id: vars[featureIndex].name + "-ta2-resid",
+          css: { "float": "left" },
+          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+
+        // create a new plot for this variable combination
+        vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 3,
+            "width": 400*plotSizeScale / 3
+          });
+        vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 3,
+            "width": 400*plotSizeScale / 3
+          });
+
+        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        //   data,
+        //   x: vars[featureIndex].name,
+        //   y: yVar.name,
+        //   width: 400*plotSizeScale,
+        //   height: 400*plotSizeScale
+        // });
+        // vismatrix.render();
+      }
+    }
+  }
+});
 
 
 // When the model changes, update the input variables.

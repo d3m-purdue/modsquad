@@ -1,0 +1,22 @@
+.container-fluid
+  .exploratory-vis
+
+    .row(style='margin-top:150')
+      .col-md-10
+        h4 Investigate Model Output
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | The prediction algorithm returns a set of predicted values. These can be
+          | viewed with respect to the original data to evaluate the goodness of fit.
+          | A good fit will follow the patterns in the data without being too noisy.
+        p(style='margin-left:40;margin-top:50;margin-right:50')
+          | We can also visualize the residuals for the model fit, which is the actual
+          | observed values subtracted from the predicted values. For a well-fitting
+          | model, the residuals should vary randomly around zero.
+        .btn-group
+          button.btn.btn-default#run-post-vis View Plots
+
+    .row(style='margin-top:50')
+      .col-md-10
+        #scatterplotmatrix2
+
+
