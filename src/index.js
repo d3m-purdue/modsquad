@@ -6,6 +6,8 @@ import { select,
 import { json } from 'd3-request';
 import dl from 'datalib';
 import Remarkable from 'remarkable';
+// import * as vl from 'vega-lite';
+// import * as vegaEmbed from 'vega-embed'
 
 import { action,
          store,
@@ -537,6 +539,18 @@ observeStore(next => {
           name: d
         }));
 
+        // use vega-lite instead of candela because we need more flexibility
+        // (need scales to not always include zero)
+        const pspec = {
+          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+          "data": { "values" : data },
+          "mark": "circle",
+          "encoding": {
+            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+            "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+          }
+        }
+
         // add a new Div inside the #scatterplotmatrix element
         jQuery('<h5/>', {
           text: vars[featureIndex].name,
@@ -547,14 +561,21 @@ observeStore(next => {
 
         // create a new plot for this variable combination
         var plotElement = document.getElementById(vars[featureIndex].name)
-        const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-          data,
-          x: vars[featureIndex].name,
-          y: yVar.name,
-          width: 400*plotSizeScale,
-          height: 400*plotSizeScale
-        });
-        vismatrix.render();
+        vegaEmbed("#" + vars[featureIndex].name, pspec,
+          {
+            "actions": false,
+            "height": 400*plotSizeScale / 2,
+            "width": 400*plotSizeScale / 2
+          });
+
+        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        //   data,
+        //   x: vars[featureIndex].name,
+        //   y: yVar.name,
+        //   width: 400*plotSizeScale,
+        //   height: 400*plotSizeScale
+        // });
+        // vismatrix.render();
       }
     }
   }
