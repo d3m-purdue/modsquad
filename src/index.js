@@ -143,21 +143,26 @@ ta2Dropdown.setItems(models, d => d.display);
 
 // Install action for train button.
 select('button.train').on('click', () => {
-  const ta2 = store.getState().get('ta2');
-  const context = JSON.stringify(ta2.get('session').toJS().context);
+  //const ta2 = store.getState().get('ta2');
+  //const context = JSON.stringify(ta2.get('session').toJS().context);
   // disabling dynamic discovery for now because it is being set during evaluitions
   //const model = ta2.get('model');
   //const port = model.get('port');
 
-  const data_uri = store.getState().getIn(['data', 'data']);
-  const task_type = store.getState().getIn(['problems', 'tasktype']);
-  const task_subtype = store.getState().getIn(['problems', 'tasksubtype']);
-  const target_features = store.getState().getIn(['problems', 'targets']);
+ 
+  const data_uri = store.getState().getIn(['data', 'schema']);
+  //const task_type = store.getState().getIn(['problem', 'tasktype']).toJS();
+  //const task_subtype = store.getState().getIn(['problem', 'tasksubtype']).toJS();
+  const task_type = 'regression'
+  const task_subtype = 'univariate'
+  const target_features = store.getState().getIn(['problem', 'targets']).toJS();
   // predict_features is currently ignored.  Later user will be able to select features to use
   // during prediction
   const predict_features = [];
-  const metrics = store.getState().getIn(['problems', 'metrics']);
+  const metrics = store.getState().getIn(['problem', 'metrics']).toJS();
   const max_pipelines = 10;
+  const context = store.getState().getIn(['ta2','session','context']).toJS()
+  console.log('context:',context)
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {

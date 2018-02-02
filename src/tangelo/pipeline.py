@@ -51,14 +51,31 @@ def get_stub():
 def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=None, target_features=None, predict_features=[],metrics=None,max_pipelines=10):
 
   stub = get_stub()
-  resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=Parse(cpb.SessionContext()),
+  task = cpb.TaskType.Value(task_type.upper())
+  taskSubtype = cpb.TaskSubtype.Value(toConstCase(task_subtype))
+
+  #metrics = cpb.Metric.Value(toConstCase(metrics))
+  metrics=[
+    core_pb2.ACCURACY,
+    core_pb2.ROC_AUC,
+    core_pb2.F1,
+    core_pb2.ROOT_MEAN_SQUARED_ERROR
+  ]
+
+  print target_features
+
+  
+  
+  #targets = [cpb.Feature(resource_id=targ['targetIndex'],feature_name=targ['colName']) for targ in target_features]
+  targets = [core_pb2.Feature(resource_id='0',feature_name='out1')]
+
+  resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=(cpb.SessionContext(context)),
                                                           dataset_uri=data_uri,
-                                                          task=cpb.TaskType.Value(task_type.upper()),
-                                                          task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
-                                                          metrics=[cpb.Metric.Value(toConstCase(metrics))],
+                                                          task=task,
+                                                          task_subtype=taskSubtype,
+                                                          metrics=metrics,
                                                           task_description='Modsquad pipeline create request',
-                                                          target_features=[cpb.Feature(resource_id=targ['targetIndex'],
-                                                                                       feature_name=targ['colName']) for targ in targets],                                                       
+                                                          target_features=targets,                                                       
                                                           predict_features=[],
                                                           max_pipelines=10))
 

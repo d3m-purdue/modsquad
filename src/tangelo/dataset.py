@@ -20,8 +20,8 @@ def run(op,*args,**kwargs):
         return 'illegal operation "%s"' % (op) if op else 'missing operation'
 
 def getDataset():       
-    problem_schema_path = os.environ.get('PROBLEM_SCHEMA_PATH')
-    dataset_schema_path = os.environ.get('DATASET_SCHEMA_PATH')
+    problem_schema_path = os.environ.get('PROBLEM_ROOT')
+    dataset_schema_path = os.environ.get('TRAINING_DATA_ROOT')
     datasupply = d3mds.D3MDS(dataset_schema_path,problem_schema_path)
     # fill nan with zeros, or should it be empty strings?
     train_data_as_df = datasupply.get_train_data().fillna(0)
@@ -43,7 +43,7 @@ def listDatasetFeatures():
 
 
 def getProblems():
-    problem_schema_path = os.environ.get('PROBLEM_SCHEMA_PATH')
+    problem_schema_path = os.environ.get('PROBLEM_ROOT')
     problem_supply = d3mds.D3MProblem(problem_schema_path)
     targets = problem_supply.get_targets()
     metrics = problem_supply.get_performance_metrics()

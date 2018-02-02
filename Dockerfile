@@ -9,7 +9,10 @@ EXPOSE 45042
 
 RUN apt-get update
 RUN apt-get install -y git curl sudo python2.7 python2.7-dev python-pip libcairo2-dev  gnupg1 
-# (not supported on python:2 base, but needed on r-base)
+# (gnupg1 not supported on python:2 base, but needed on r-base)
+
+# add the 'ps' command back
+RUN apt-get -y install procps
 
 # Install Node.js 6
 # build from python 2 based required removal npm from install line with nodejs below
