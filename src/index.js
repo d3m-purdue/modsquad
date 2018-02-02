@@ -54,10 +54,10 @@ json('/config', cfg => {
 
   // now that we have the config information, store the problems to be solved
   json('/dataset/problems', (error,problem_contents) => {
-    console.log('ajax return:',problem_contents)
+    console.log('ajax return:', problem_contents)
     //store.dispatch(action.setProblemDescription(problem_contents['description']));
     store.dispatch(action.setProblemId(problem_contents[0]['problemId']));
-    store.dispatch(action.setProblemTaskType(problem_contents[0]['taskType'])); 
+    store.dispatch(action.setProblemTaskType(problem_contents[0]['taskType']));
     store.dispatch(action.setProblemTaskSubType(problem_contents[0]['taskSubType']));
     store.dispatch(action.setProblemMetrics(problem_contents[0]['metrics']));
     store.dispatch(action.setProblemTargetFeatures(problem_contents[0]['targets']));
@@ -146,7 +146,7 @@ select('button.train').on('click', () => {
   // disabling dynamic discovery for now because it is being set during evaluitions
   //const model = ta2.get('model');
   //const port = model.get('port');
- 
+
   const data_uri = store.getState().getIn(['data', 'data']);
   const task_type = store.getState().getIn(['problems', 'tasktype']);
   const task_subtype = store.getState().getIn(['problems', 'tasksubtype']);
@@ -169,7 +169,7 @@ select('button.train').on('click', () => {
     max_pipelines
   };
   console.log('pipeline params:',params)
-  
+
   let query = [];
   for (let x in params) {
     if (params.hasOwnProperty(x)) {
@@ -225,7 +225,7 @@ observeStore(next => {
 
 
 
-let yVarDropdown = new Dropdown(select('#x-dropdown').node(), {
+let yVarDropdown = new Dropdown(select('#y-dropdown').node(), {
   buttonText: 'Target Variable',
   onSelect: item => {
     store.dispatch(action.setExploratoryVar(0, item));
@@ -242,9 +242,15 @@ let yVarDropdown = new Dropdown(select('#x-dropdown').node(), {
 
 const varsChanged = (origVars, logVars) => {
   const vars = [].concat(origVars, logVars);
-
+  const colIndex = store.getState().getIn(['problem', 'targets', 0, 'colIndex']);
   // Fill the variable menus in the exploratory vis section.
-  yVarDropdown.setItems(vars, d => d.name);
+  yVarDropdown.setItems(vars, (d, i) => {
+    let nm = d.name;
+    if (i === colIndex) {
+      nm = `${nm} *`;
+    }
+    return nm;
+  });
   //yVarDropdown.setItems(vars, d => d.name);
 };
 
@@ -336,24 +342,24 @@ observeStore(next => {
     });
 }, s => s.get('vars'));
 
-// When the list of problems changes, populate the problems tab menu.
-let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
-  buttonText: 'Problem',
-  onSelect: prob => {
-    select('.description')
-      .html(md.render(prob.description));
+// // When the list of problems changes, populate the problems tab menu.
+// let problemDropdown = new Dropdown(select('#problemdropdown').node(), {
+//   buttonText: 'Problem',
+//   onSelect: prob => {
+//     select('.description')
+//       .html(md.render(prob.description));
 
-    select('.metadata')
-      .append(d => stringToElement(metadataTemplate({
-        metadata: prob.metadata
-      })));
+//     select('.metadata')
+//       .append(d => stringToElement(metadataTemplate({
+//         metadata: prob.metadata
+//       })));
 
-    //json(`/dataset/data/${prob.dataFile}`, data => {
-    json('/dataset/datatesting', data => {
-      store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
-    });
-  }
-});
+//     //json(`/dataset/data/${prob.dataFile}`, data => {
+//     json('/dataset/datatesting', data => {
+//       store.dispatch(action.setActiveData(data.data, data.name, data.path, data.meta));
+//     });
+//   }
+// });
 
 /*
 observeStore(next => {
@@ -702,8 +708,8 @@ observeStore(next => {
     })));
 
   // when the predict button is selected, then connect to the TA2 by calling a tangelo service
-  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are 
-  // gathered here,  packed into a query object, and sent to the service. 
+  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are
+  // gathered here,  packed into a query object, and sent to the service.
 
   const predict = panels.select('.predict')
     .on('click', d => {
