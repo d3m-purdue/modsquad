@@ -2,10 +2,10 @@ setConfig:
   - config
 
 setProblemTaskType:
-  - tasktype
+  - taskType
 
 setProblemTaskSubType:
-  - tasksubtype
+  - taskSubType
 
 setProblemMetrics:
   - metrics

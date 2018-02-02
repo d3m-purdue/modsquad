@@ -49,12 +49,14 @@ def getProblems():
     metrics = problem_supply.get_performance_metrics()
     taskType = problem_supply.get_taskType()
     subType =  problem_supply.get_taskSubType()
+    targets = problem_supply.get_targets()
     problems = []
     problems.append({'problemId': problem_supply.get_problemID(),
                         #'description': problem_supply.get_problemDescription(),
                         'taskType': taskType,
                         'taskSubType': subType,
-                         'metrics' : metrics
+                         'metrics' : metrics,
+                         'targets': targets
                          })
 
     return problems

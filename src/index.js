@@ -130,7 +130,7 @@ let ta2Dropdown = new Dropdown(select('.ta2-models').node(), {
 
     json(`/session?port=${item.port}`)
       .post({}, session => {
-        console.log('session returned was:',session)
+        //console.log('session returned was:',session)
         store.dispatch(action.setTA2Session(session));
       });
 
@@ -148,14 +148,14 @@ select('button.train').on('click', () => {
   //const port = model.get('port');
  
   const data_uri = store.getState().getIn(['data', 'data']);
-  const task_type = store.getState().getIn(['problems', 0, 'metadata', 'taskType']);
-  const task_subtype = store.getState().getIn(['problems', 0, 'metadata', 'taskSubType']);
-  const target_features = store.getState().getIn(['problems', 0, 'metadata', 'outputType']);
+  const task_type = store.getState().getIn(['problems', 'tasktype']);
+  const task_subtype = store.getState().getIn(['problems', 'tasksubtype']);
+  const target_features = store.getState().getIn(['problems', 'targets']);
   // predict_features is currently ignored.  Later user will be able to select features to use
   // during prediction
   const predict_features = [];
-  const metrics = store.getState().getIn(['problems', 0, 'metadata', 'metric']);
-  max_pipelines = 10;
+  const metrics = store.getState().getIn(['problems', 'metrics']);
+  const max_pipelines = 10;
 
   // Gather the parameters needed for a CreatePipelines call.
   const params = {
@@ -168,6 +168,8 @@ select('button.train').on('click', () => {
     predict_features,
     max_pipelines
   };
+  console.log('pipeline params:',params)
+  
   let query = [];
   for (let x in params) {
     if (params.hasOwnProperty(x)) {

@@ -5,7 +5,8 @@ nav.navbar.navbar-inverse
       a.navbar-brand ModSquad
 
 ul.nav.nav-tabs
-  li.active: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
+  li.active: a(href="#welcome" data-toggle="tab" aria-expanded="true") Problems
+  li: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
   li: a(href="#ta2" data-toggle="tab" aria-expanded="true") TA2
@@ -13,7 +14,10 @@ ul.nav.nav-tabs
   li: a(href="#stopping" data-toggle="tab" aria-expanded="true") Quit
 
 .tab-content
-  #problems.tab-pane.fade.active.in
+  #welcome.tab-pane.fade.active.in
+    include template/welcome.jade
+
+  #problems.tab-pane.fade.in
     include template/problems.jade
 
   #variables.tab-pane.fade.in
