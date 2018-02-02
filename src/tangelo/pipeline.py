@@ -73,12 +73,8 @@ def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=Non
   #targets = [cpb.Feature(resource_id=targ['targetIndex'],feature_name=targ['colName']) for targ in target_features]
   #targets = [core_pb2.Feature(resource_id='0',feature_name='out1')]
   
-  # the metrics are imprecise text versions of the enumerations, so just standardize
-  metrics=[
-            core_pb2.ACCURACY,
-            core_pb2.ROC_AUC,
-            core_pb2.F1
-        ],
+  # the metrics in the files are imprecise text versions of the enumerations, so just standardize
+  metrics=[core_pb2.ROC_AUC]
 
   context_in = cpb.SessionContext(session_id=context)
 

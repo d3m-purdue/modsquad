@@ -6,8 +6,6 @@ import { select,
 import { json } from 'd3-request';
 import dl from 'datalib';
 import Remarkable from 'remarkable';
-// import * as vl from 'vega-lite';
-// import * as vegaEmbed from 'vega-embed'
 
 import { action,
          store,
@@ -322,8 +320,8 @@ observeStore(next => {
      const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 600*plotSizeScale,
-        height: 400*plotSizeScale
+        width: 500*plotSizeScale,
+        height: 300*plotSizeScale
       });
       vis.render();
 
@@ -331,8 +329,8 @@ observeStore(next => {
       const vis2= new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 600*plotSizeScale,
-        height: 400*plotSizeScale
+        width: 500*plotSizeScale,
+        height: 300*plotSizeScale
       });
       vis2.render();
     });
@@ -542,15 +540,15 @@ observeStore(next => {
 
         // use vega-lite instead of candela because we need more flexibility
         // (need scales to not always include zero)
-        const pspec = {
-          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-          "data": { "values" : data },
-          "mark": "circle",
-          "encoding": {
-            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-            "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
-          }
-        }
+        // const pspec = {
+        //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+        //   "data": { "values" : data },
+        //   "mark": "circle",
+        //   "encoding": {
+        //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+        //     "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+        //   }
+        // }
 
         // add a new Div inside the #scatterplotmatrix element
         jQuery('<h5/>', {
@@ -561,22 +559,25 @@ observeStore(next => {
           }).appendTo('#scatterplotmatrix');
 
         // create a new plot for this variable combination
-        var plotElement = document.getElementById(vars[featureIndex].name)
-        vegaEmbed("#" + vars[featureIndex].name, pspec,
-          {
-            "actions": false,
-            "height": 600*plotSizeScale / 2,
-            "width": 600*plotSizeScale / 2
-          });
+        // vegaEmbed("#" + vars[featureIndex].name, pspec,
+        //   {
+        //     "actions": false,
+        //     "height": 400*plotSizeScale / 2,
+        //     "width": 400*plotSizeScale / 2
+        //   });
 
-        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        //   data,
-        //   x: vars[featureIndex].name,
-        //   y: yVar.name,
-        //   width: 400*plotSizeScale,
-        //   height: 400*plotSizeScale
-        // });
-        // vismatrix.render();
+        var plotElement = document.getElementById(vars[featureIndex].name)
+
+        const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+          data,
+          x: vars[featureIndex].name,
+          y: yVar.name,
+          xScale: { "zero": false },
+          yScale: { "zero": false },
+          width: 600 * plotSizeScale,
+          height: 600 * plotSizeScale
+        });
+        vismatrix.render();
       }
     }
   }
@@ -657,12 +658,19 @@ select('button#run-post-vis').on('click', () => {
       }).appendTo('#scatterplotmatrix2');
 
     // create a new plot for this variable combination
-    vegaEmbed("#ta2-pred-resid", pspec,
-      {
-        "actions": false,
-        "height": 600*plotSizeScale / 3,
-        "width": 600*plotSizeScale / 3
-      });
+
+    var plotElement = document.getElementById("ta2-pred-resid");
+    const vismatrix0 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+      data,
+      x: "Predicted",
+      y: "Residuals",
+      xScale: { "zero": false },
+      yScale: { "zero": false },
+      width: 400 * plotSizeScale,
+      height: 400 * plotSizeScale
+    });
+    vismatrix0.render();
+
 
     // loop through the features and draw a plot for each feature compared to the modeling feature
     for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
@@ -685,38 +693,38 @@ select('button#run-post-vis').on('click', () => {
           name: d
         }));
 
-        // use vega-lite instead of candela because we need more flexibility
-        // (need scales to not always include zero)
-        const pspec = {
-          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-          "data": { "values" : data },
-          "layer": [{
-            "mark": "point",
-            "encoding": {
-              "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-              "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
-            }
-          }
-          // , {
-          //   "mark": "line",
-          //   "encoding": {
-          //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-          //     "y": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
-          //     "color": {"value": "black"}
-          //   }
-          // }
-          ]
-        }
+        // // use vega-lite instead of candela because we need more flexibility
+        // // (need scales to not always include zero)
+        // const pspec = {
+        //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+        //   "data": { "values" : data },
+        //   "layer": [{
+        //     "mark": "point",
+        //     "encoding": {
+        //       "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+        //       "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+        //     }
+        //   }
+        //   // , {
+        //   //   "mark": "line",
+        //   //   "encoding": {
+        //   //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+        //   //     "y": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
+        //   //     "color": {"value": "black"}
+        //   //   }
+        //   // }
+        //   ]
+        // }
 
-        const pspec2 = {
-          "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-          "data": { "values" : data },
-          "mark": "circle",
-          "encoding": {
-            "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-            "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
-          }
-        }
+        // const pspec2 = {
+        //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+        //   "data": { "values" : data },
+        //   "mark": "circle",
+        //   "encoding": {
+        //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+        //     "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
+        //   }
+        // }
 
         // add a new Div inside the #scatterplotmatrix element
         jQuery('<h5/>', {
@@ -736,27 +744,41 @@ select('button#run-post-vis').on('click', () => {
           }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
 
         // create a new plot for this variable combination
-        vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
-          {
-            "actions": false,
-            "height": 400*plotSizeScale / 3,
-            "width": 400*plotSizeScale / 3
-          });
-        vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
-          {
-            "actions": false,
-            "height": 400*plotSizeScale / 3,
-            "width": 400*plotSizeScale / 3
-          });
+        // vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
+        //   {
+        //     "actions": false,
+        //     "height": 400*plotSizeScale / 3,
+        //     "width": 400*plotSizeScale / 3
+        //   });
+        // vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
+        //   {
+        //     "actions": false,
+        //     "height": 400*plotSizeScale / 3,
+        //     "width": 400*plotSizeScale / 3
+        //   });
+        var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-pred")
+        const vismatrix1 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+          data,
+          x: vars[featureIndex].name,
+          y: yVar.name,
+          xScale: { "zero": false },
+          yScale: { "zero": false },
+          width: 500 * plotSizeScale / 1.5,
+          height: 500 * plotSizeScale / 1.5
+        });
+        vismatrix1.render();
 
-        // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        //   data,
-        //   x: vars[featureIndex].name,
-        //   y: yVar.name,
-        //   width: 400*plotSizeScale,
-        //   height: 400*plotSizeScale
-        // });
-        // vismatrix.render();
+        var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-resid")
+        const vismatrix2 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+          data,
+          x: vars[featureIndex].name,
+          y: "Residuals",
+          xScale: { "zero": false },
+          yScale: { "zero": false },
+          width: 500 * plotSizeScale / 1.5,
+          height: 500 * plotSizeScale / 1.5
+        });
+        vismatrix2.render();
       }
     }
   }
