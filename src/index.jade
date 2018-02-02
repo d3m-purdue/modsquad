@@ -6,7 +6,7 @@ nav.navbar.navbar-inverse
 
 ul.nav.nav-tabs
   li.active: a(href="#welcome" data-toggle="tab" aria-expanded="true") Welcome
-  li: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
+  //li: a(href="#problems" data-toggle="tab" aria-expanded="true") Problems
   li: a(href="#variables" data-toggle="tab" aria-expanded="true") Variables
   li: a(href="#exploratory-vis" data-toggle="tab" aria-expanded="true") Exploratory Vis
   li: a(href="#ta2" data-toggle="tab" aria-expanded="true") Model Discovery (TA2)
@@ -18,8 +18,8 @@ ul.nav.nav-tabs
   #welcome.tab-pane.fade.active.in
     include template/welcome.jade
 
-  #problems.tab-pane.fade.in
-    include template/problems.jade
+  //#problems.tab-pane.fade.in
+  //  include template/problems.jade
 
   #variables.tab-pane.fade.in
     include template/variables.jade

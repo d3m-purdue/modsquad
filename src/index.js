@@ -326,8 +326,8 @@ observeStore(next => {
      const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300*plotSizeScale,
-        height: 200*plotSizeScale
+        width: 600*plotSizeScale,
+        height: 400*plotSizeScale
       });
       vis.render();
 
@@ -335,8 +335,8 @@ observeStore(next => {
       const vis2= new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300*plotSizeScale,
-        height: 200*plotSizeScale
+        width: 600*plotSizeScale,
+        height: 400*plotSizeScale
       });
       vis2.render();
     });
@@ -422,8 +422,8 @@ observeStore(next => {
       const vis = new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 300,
-        height: 200
+        width: 600,
+        height: 400
       });
       vis.render();
     });
@@ -470,8 +470,8 @@ observeStore(next => {
       x: 'x',
       y: 'y',
       opacity: 0.9,
-      width: 300*plotSizeScale,
-      height: 400*plotSizeScale
+      width: 400*plotSizeScale,
+      height: 300*plotSizeScale
     });
     vis.render();
   }
@@ -570,8 +570,8 @@ observeStore(next => {
         vegaEmbed("#" + vars[featureIndex].name, pspec,
           {
             "actions": false,
-            "height": 400*plotSizeScale / 2,
-            "width": 400*plotSizeScale / 2
+            "height": 600*plotSizeScale / 2,
+            "width": 600*plotSizeScale / 2
           });
 
         // const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
@@ -665,8 +665,8 @@ select('button#run-post-vis').on('click', () => {
     vegaEmbed("#ta2-pred-resid", pspec,
       {
         "actions": false,
-        "height": 400*plotSizeScale / 3,
-        "width": 400*plotSizeScale / 3
+        "height": 600*plotSizeScale / 3,
+        "width": 600*plotSizeScale / 3
       });
 
     // loop through the features and draw a plot for each feature compared to the modeling feature
