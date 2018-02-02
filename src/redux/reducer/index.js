@@ -14,8 +14,12 @@ const initial = Immutable.fromJS({
     schema: null
   },
   problem: {
-    schema: null,
-    taskType: null
+    problemId: null,
+    description: null,
+    taskType: null,
+    taskSubType: null,
+    metrics: null,
+    targets: []
   },
   vars: [],
   logVars: [],
@@ -53,11 +57,30 @@ const reducer = (state = initial, action = {}) => {
       newState = state.set('config', Immutable.fromJS(action.config));
       break;
 
-    case actionType.setProblem:
-      newState = state.set('problem', Immutable.fromJS(action.problem));
+  case actionType.setProblemId:
+      newState = state.setIn(['problem','problemId'], Immutable.fromJS(action.problemId));
       break;
 
-    // new for Jan18 - called when problem config changes
+    case actionType.setProblemDescription:
+      newState = state.setIn(['problem', 'description'], Immutable.fromJS(action.problemDescription));
+      break;
+
+    case actionType.setProblemTaskType:
+      newState = state.setIn(['problem','tasktype'], Immutable.fromJS(action.taskType));
+      break;
+
+    case actionType.setProblemTaskSubType:
+      newState = state.setIn(['problem','tasksubtype'], Immutable.fromJS(action.taskSubType));
+      break;
+
+    case actionType.setProblemMetrics:
+      newState = state.setIn(['problem','metrics'], Immutable.fromJS(action.metrics));
+      break;
+
+    case actionType.setProblemTargetFeatures:
+      newState = state.setIn(['problem','targets'], Immutable.fromJS(action.targets));
+      break;
+
     case actionType.setDataSchema:
       newState = state.withMutations(s => {
         s.setIn(['data', 'schema'], Immutable.fromJS(action.schema));

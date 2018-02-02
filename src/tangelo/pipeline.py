@@ -39,13 +39,7 @@ def get_stub(port):
     return stub
 
 
-def createPipeline(port=None, session=None, data_uri=None, predictor=None, response=None, task_type=None, task_subtype=None, output_type=None, metric=None):
-    stub = get_stub(int(port))
-
-
-    predictor = json.loads(predictor)
-    response = json.loads(response)
-
+def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=None, target_features=None, predict_features=[],metrics=None,max_pipelines=10):
 
 """
 message PipelineCreateRequest {
@@ -63,20 +57,23 @@ message PipelineCreateRequest {
                                                 // of the top results sorted by the relevant metric if required
 }
 """
+        metrics=[
+            core_pb2.ACCURACY,
+            core_pb2.ROC_AUC,
+            core_pb2.F1
+        ]
 
 
     resp = stub.CreatePipelines(cpb.PipelineCreateRequest(context=Parse(session, cpb.SessionContext()),
-                                                          dataset_uri=
+                                                          dataset_uri=data_uri
                                                           task=cpb.TaskType.Value(task_type.upper()),
                                                           task_subtype=cpb.TaskSubtype.Value(toConstCase(task_subtype)),
-                                                          output=cpb.OutputType.Value(toConstCase(output_type)),
-                                                          metrics=[cpb.Metric.Value(toConstCase(metric))],
-                                                          task_description='TA2 pipeline creation',
-                                                          target_features=[cpb.Feature(feature_id=targ,
-                                                                                       data_uri=data_uri) for targ in response],                                                       
-                                                          predict_features=[cpb.Feature(feature_id=pred,
-                                                                                      data_uri=data_uri) for pred in predictor],
-                                                          max_pipelines=5))
+                                                          metrics=[cpb.Metric.Value(toConstCase(metrics))],
+                                                          task_description='Modsquad pipeline create request',
+                                                          target_features=[cpb.Feature(resource_id=targ['targetIndex'],
+                                                                                       feature_name=targ['colName']) for targ in targets],                                                       
+                                                          predict_features=[],
+                                                          max_pipelines=10))
 
     return map(lambda x: json.loads(MessageToJson(x)), resp)
 

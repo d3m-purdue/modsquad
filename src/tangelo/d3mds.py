@@ -229,6 +229,16 @@ class D3MProblem:
 		"""
 		return self.prDoc['inputs']['data'][0]['targets']
 
+	# problems have a problem description at the top, but not copied down to the train or test level. 
+	def get_problemDescription(self):
+		return self.prDoc['about']['problemDescription']
+
+	def get_taskType(self):
+		return self.prDoc['about']['taskType']
+
+	def get_taskSubType(self):
+		return self.prDoc['about']['taskSubType']
+
 	def get_datasplits(self, view=None):
 		"""
 		Returns the data splits splits in a dataframe
@@ -321,5 +331,10 @@ class D3MDS:
 
 	def get_test_targets(self):
 		df = self.dataset.get_learning_data(view='test', problem=self.problem)
+		target_cols = self._get_target_columns(df)
+		return np.ravel(df[df.columns[target_cols]])
+
+	def get_problem_targets(self):
+		df = self.problem.get_learning_data(view='test', problem=self.problem)
 		target_cols = self._get_target_columns(df)
 		return np.ravel(df[df.columns[target_cols]])
