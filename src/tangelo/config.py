@@ -31,4 +31,5 @@ def run():
     os.environ['DATASET_SCHEMA_PATH'] = config['dataset_schema']
     os.environ['TRAINING_DATA_ROOT'] = config['training_data_root']
     os.environ['PROBLEM_ROOT'] = config['problem_root']
+    os.environ['EXECUTABLES_ROOT'] = config['executables_root']
     return config

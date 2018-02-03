@@ -154,7 +154,7 @@ select('button.train').on('click', () => {
   // during prediction
   const predict_features = [];
   const metrics = store.getState().getIn(['problem', 'metrics']).toJS();
-  const max_pipelines = 10;
+  const max_pipelines = 5;
   const context = store.getState().getIn(['ta2','session','context']).toJS()['sessionId']
   console.log('context:',context)
 
@@ -184,7 +184,7 @@ select('button.train').on('click', () => {
     resp = resp.filter(x => x.progressInfo === 'COMPLETED');
 
     resp.forEach(pipeline => {
-      store.dispatch(action.addPipeline(pipeline.pipelineId, pipeline.pipelineInfo.predictResultUris[0], pipeline.pipelineInfo.scores[0], response));
+      store.dispatch(action.addPipeline(pipeline.pipelineId, pipeline.pipelineInfo.predictResultUri, pipeline.pipelineInfo.scores[0]));
     });
   });
 });
@@ -935,23 +935,20 @@ observeStore(next => {
 
   const predict = panels.select('.predict')
     .on('click', d => {
-      const ta2 = store.getState().get('ta2');
-      const session = JSON.stringify(ta2.get('session').toJS().context);
-      const model = ta2.get('model');
-      const port = model.get('port');
-      const predictor = store.getState().getIn(['data', 'meta', 'trainData', 'trainData'])
-        .toJS()
-        .filter(f => f.varRole === 'attribute')
-        .filter(f => f.varType === 'integer' || f.varType === 'float')
-        .map(f => f.varName);
+      //const ta2 = store.getState().get('ta2');
+      const context = store.getState().getIn(['ta2','session','context']).toJS()['sessionId']
+      //const predictor = store.getState().getIn(['data', 'meta', 'trainData', 'trainData'])
+      //  .toJS()
+      //  .filter(f => f.varRole === 'attribute')
+      //  .filter(f => f.varType === 'integer' || f.varType === 'float')
+      //  .map(f => f.varName);
+
       const data_uri = store.getState().getIn(['config'])['dataset_schema']
 
       const params = {
-        port,
-        session,
+        context,
         pipeline: d.id,
-        data_uri,
-        predictor: JSON.stringify(predictor)
+        data_uri
       };
 
       let query = [];
@@ -969,14 +966,10 @@ observeStore(next => {
   panels.select('.export')
     .on('click', d => {
       const ta2 = store.getState().get('ta2');
-      const session = JSON.stringify(ta2.get('session').toJS().context);
-      const model = ta2.get('model');
-      const port = model.get('port');
-
+      const context = store.getState().getIn(['ta2','session','context']).toJS()['sessionId']
 
       const params = {
-        port,
-        session,
+        context,
         pipeline: d.id,
       };
 

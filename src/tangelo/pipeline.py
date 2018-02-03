@@ -52,28 +52,24 @@ def get_stub():
 def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=None, target_features=None, predict_features=[],metrics=None,max_pipelines=10):
 
   stub = get_stub()
-  #task = cpb.TaskType.Value(task_type.upper())
-  #taskSubtype = cpb.TaskSubtype.Value(toConstCase(task_subtype))
   
   problem_schema_path = os.environ.get('PROBLEM_ROOT')
   problem_supply = d3mds.D3MProblem(problem_schema_path)
+
+  # get the target features into the record format expected by the API
   targets =  problem_supply.get_targets()
-  #metrics = problem_supply.get_performance_metrics()
-  #task = problem_supply.get_taskType()
-  #tasksubtype = problem_supply.get_taskSubType()
-  
   features = []
   for entry in targets:
     tf = core_pb2.Feature(resource_id=entry['resID'],feature_name=entry['colName'])
     features.append(tf)
 
+  # we are having trouble parsing the problem specs into valid API specs, so just hardcode
+  # to this problem type for now.  We could fix this with a lookup table to return valid API codes
   task = core_pb2.REGRESSION
   tasksubtype = core_pb2.UNIVARIATE
 
-  #targets = [cpb.Feature(resource_id=targ['targetIndex'],feature_name=targ['colName']) for targ in target_features]
-  #targets = [core_pb2.Feature(resource_id='0',feature_name='out1')]
-  
-  # the metrics in the files are imprecise text versions of the enumerations, so just standardize
+  # the metrics in the files are imprecise text versions of the enumerations, so just standardize.  A lookup table
+  # would help here, too
   metrics=[core_pb2.ROC_AUC]
 
   context_in = cpb.SessionContext(session_id=context)
@@ -93,29 +89,34 @@ def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=Non
 
 
 
-def executePipeline(port=None, session=None, pipeline=None, data=None, predictor=None):
+def executePipeline(context=None, pipeline=None, data_uri=None):
     stub = get_stub()
 
-    data_uri = 'file://%s' % (data)
+    # add file descriptor if it is missing. some systems might be inconsistent, but file:// is the standard
+    if data_uri[0:4] != 'file':
+      data_uri = 'file://%s' % (data_uri)
 
-    predictor = json.loads(predictor)
+    context_in = cpb.SessionContext(session_id=context)
 
-    resp = stub.ExecutePipeline(cpb.PipelineExecuteRequest(context=Parse(session, cpb.SessionContext()),
-                                                           pipeline_id=pipeline,
-                                                           predict_features=[cpb.Feature(feature_id=pred,
-                                                                                         data_uri=data_uri) for pred in predictor]))
-
+    request_in = cpb.PipelineExecuteRequest(context=context_in,                      
+                                            pipeline_id=pipeline,
+                                            dataset_uri=data_uri)
+    resp = stub.ExecutePipeline(request_in)
     return map(lambda x: json.loads(MessageToJson(x)), resp)
 
 
-def exportPipeline(port=None, session=None, pipeline=None):
-    stub = get_stub(int(port))
 
-    exec_name = '%s-%s-%f.exe' % (session, pipeline, time.time())
+def exportPipeline(context=None, pipeline=None):
+    stub = get_stub()
+    context_in = cpb.SessionContext(session_id=context)
+
+    # be sure to make a URI that matches where the TA2 will be able to write out during execution
+    executables_root = os.environ.get('EXECUTABLES_ROOT')
+    exec_name = '%s/modsquad-%s-%s-%f.executable' % (executables_root, context_in, pipeline, time.time())
     exec_uri = 'file://%s' % (exec_name)
 
-    resp = stub.ExportPipeline(cpb.PipelineExportRequest(context=Parse(session, cpb.SessionContext()),
+    resp = stub.ExportPipeline(cpb.PipelineExportRequest(context=context,
                                                          pipeline_id=pipeline,
                                                          pipeline_exec_uri=exec_uri))
 
-    return map(lambda x: json.loads(MessageToJson(x)), resp)
+    return json.loads(MessageToJson(resp))
