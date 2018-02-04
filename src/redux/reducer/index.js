@@ -1,13 +1,15 @@
 import Immutable from 'immutable';
 
 import { actionType } from '../action';
-// data = actual list of dictionaries;
-// name = dataset name
-// mode = 'train' or 'test'
-// path = 'path to datasetDoc.json'
+
 
 const initial = Immutable.fromJS({
+
+  // the config JSON object, as received from the d3m execution system
   config: null,
+
+  // data = actual data elements as list of dictionaries
+  // schema = full pathto datasetDoc.json, e.g. '/datasets/problem2/data/datasetDoc.json'
   data: {
     data: null,
     schema: null
@@ -40,7 +42,9 @@ const initial = Immutable.fromJS({
       response: null
     },
     session: null,
-    pipelines: []
+    pipelines: [],
+    executedPipelines: [],
+    executedData: []
   }
 });
 
@@ -166,6 +170,8 @@ const reducer = (state = initial, action = {}) => {
       newState = state.setIn(['ta2', 'session'], Immutable.fromJS(action.sessionId));
       break;
 
+    // this is called for each pipeline we receive back from the TA2 instance.  These are pipeines
+    // that have been trained on training data and are ready for testing/execution with new data 
     case actionType.addPipeline:
       // Only add the new pipeline if it's not already in the pipelines list.
       const found = state.getIn(['ta2', 'pipelines']).findIndex(p => p.get('id') === action.id);
@@ -178,6 +184,36 @@ const reducer = (state = initial, action = {}) => {
         })));
       }
       break;
+
+    // this is called each time a trained pipeline is executed with new data.  The resulting URI
+    // indicates where to access the output data (the predicted values)
+    case actionType.addExecutedPipeline:
+      // Only add the new pipeline if it's not already in the pipelines list.
+      const execfound = state.getIn(['ta2', 'executedPipelines']).findIndex(p => p.get('id') === action.id);
+      if (execfound === -1) {
+        newState = state.updateIn(['ta2', 'executedPipelines'], executedPipelines => executedPipelines.push(Immutable.fromJS({
+          id: action.id,
+          response: action.response,
+          resultURI: action.resultURI,
+          data: action.data
+        })));
+      }
+      break;
+
+    // this is called each time a trained pipeline is executed with new data.  The resulting URI
+    // indicates where to access the output data (the predicted values)
+    case actionType.addExecutedPipelineData:
+      // Only add the new pipeline if it's not already in the pipelines list.
+      const datafound = state.getIn(['ta2', 'executedData']).findIndex(p => p.get('id') === action.id);
+      if (datafound === -1) {
+        newState = state.updateIn(['ta2', 'executedData'], executedData => executedData.push(Immutable.fromJS({
+          id: action.id,
+          data: action.data
+        })));
+      }
+      break;
+
+
   }
 
   return newState;

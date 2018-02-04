@@ -7,6 +7,8 @@ import tangelo
 import time
 import os
 import d3mds
+import csv
+import shutil
 
 import core_pb2 as core_pb2
 import core_pb2_grpc as core_pb2_grpc
@@ -89,6 +91,24 @@ def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=Non
 
 
 
+
+def pipelineCreateResults(context=None, pipeline=None, data_uri=None):
+    stub = get_stub()
+
+    # add file descriptor if it is missing. some systems might be inconsistent, but file:// is the standard
+    if data_uri[0:4] != 'file':
+      data_uri = 'file://%s' % (data_uri)
+
+    context_in = cpb.SessionContext(session_id=context)
+
+    request_in = cpb.PipelineCreateResultsRequest(context=context_in,                      
+                                                  pipeline_id=pipeline)
+    resp = stub.GetCreatePipelineResults(request_in)
+    return map(lambda x: json.loads(MessageToJson(x)), resp)
+
+
+
+
 def executePipeline(context=None, pipeline=None, data_uri=None):
     stub = get_stub()
 
@@ -102,7 +122,32 @@ def executePipeline(context=None, pipeline=None, data_uri=None):
                                             pipeline_id=pipeline,
                                             dataset_uri=data_uri)
     resp = stub.ExecutePipeline(request_in)
-    return map(lambda x: json.loads(MessageToJson(x)), resp)
+
+    executedPipes =  map(lambda x: json.loads(MessageToJson(x)), resp)
+    print executedPipes
+    # now loop through the returned pipelines and copy their data
+    map(lambda x: copyToWebRoot(x), executedPipes)
+    return executedPipes
+
+
+# read the CSV written out as the predicted result of a pipeline and return it as 
+# a list of json dictionaries
+def copyToWebRoot(returnRec=None):
+    
+    resultURI = returnRec['resultUri']
+    print 'copying pipelineURI:',resultURI
+    if resultURI is None:
+        tangelo.http_status(500)
+        return {'error': 'no resultURI for executed pipeline'}
+    if resultURI[0:7] == 'file://':
+        resultURI = resultURI[7:]
+    
+    # copy the results file under the webroot so it can be read by
+    # javascript without having cross origin problems
+    shutil.copy(resultURI,'pipelines')
+    print 'copy completed'
+
+    return resultURI
 
 
 
@@ -112,10 +157,10 @@ def exportPipeline(context=None, pipeline=None):
 
     # be sure to make a URI that matches where the TA2 will be able to write out during execution
     executables_root = os.environ.get('EXECUTABLES_ROOT')
-    exec_name = '%s/modsquad-%s-%s-%f.executable' % (executables_root, context_in, pipeline, time.time())
+    exec_name = '%s/modsquad-%s-%s-%f.executable' % (executables_root, context, pipeline, time.time())
     exec_uri = 'file://%s' % (exec_name)
 
-    resp = stub.ExportPipeline(cpb.PipelineExportRequest(context=context,
+    resp = stub.ExportPipeline(cpb.PipelineExportRequest(context=context_in,
                                                          pipeline_id=pipeline,
                                                          pipeline_exec_uri=exec_uri))
 

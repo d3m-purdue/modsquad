@@ -63,4 +63,12 @@ addPipeline:
   - id
   - resultURI
   - score
+
+addExecutedPipeline:
+  - id
+  - resultURI
   - response
+
+addExecutedPipelineData:
+  - id
+  - data

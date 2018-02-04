@@ -930,7 +930,7 @@ observeStore(next => {
     })));
 
   // when the predict button is selected, then connect to the TA2 by calling a tangelo service
-  // to make the GRPC API handshake.   The parameters needed to create an analysis pipeline are
+  // to make the GRPC API handshake.   The parameters needed to execute an existing analysis pipeline are
   // gathered here,  packed into a query object, and sent to the service.
 
   const predict = panels.select('.predict')
@@ -943,7 +943,7 @@ observeStore(next => {
       //  .filter(f => f.varType === 'integer' || f.varType === 'float')
       //  .map(f => f.varName);
 
-      const data_uri = store.getState().getIn(['config'])['dataset_schema']
+      const data_uri = store.getState().getIn(['config']).toJS()['dataset_schema']
 
       const params = {
         context,
@@ -959,7 +959,44 @@ observeStore(next => {
       }
       const url = `/pipeline/execute?${query.join('&')}`;
       json(url).post({}, resp => {
-        console.log(resp);
+        //console.log(resp);
+        resp = resp.filter(x => x.progressInfo === 'COMPLETED');
+        resp.forEach(pipeline => {
+          store.dispatch(action.addExecutedPipeline(pipeline.pipelineId, pipeline.responseInfo,pipeline.resultUri));
+      
+          // read the CSV results from the pipeline. First, extract the filename from the path,
+          // then add the accessible directory and read the file
+          const filename = pipeline.resultUri.substring(pipeline.resultUri.lastIndexOf('/')+1);
+          const accessibleLocation = 'pipelines/'+filename
+          $.ajax({
+            url: accessibleLocation,
+            dataType: 'text',
+            success: function (predictedData) {
+              // store the returned results in the store in a pipeline results section   
+              console.log(predictedData)
+            }
+          });
+         
+          // read the data and put it in the store
+          const resultUri = pipeline.resultUri
+          const params = {
+           resultUri
+          };
+
+          let query = [];
+          for (let x in params) {
+           if (params.hasOwnProperty(x)) {
+             query.push(`${x}=${params[x]}`);
+           }
+          }
+          // read the data in a tangelo service and add it to the store, organized by the pipeline
+          const url = `/ta2read?${query.join('&')}`;
+          json(url).post({}, predictedData => {
+           console.log(predictedData)
+           store.dispatch(action.addExecutedPipelineData(pipeline.pipelineId,predictedData));
+          });
+
+        });
       });
     });
 

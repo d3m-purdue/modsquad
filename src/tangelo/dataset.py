@@ -24,8 +24,8 @@ def getDataset():
     dataset_schema_path = os.environ.get('TRAINING_DATA_ROOT')
     datasupply = d3mds.D3MDS(dataset_schema_path,problem_schema_path)
     # fill nan with zeros, or should it be empty strings?
-    train_data_as_df = datasupply.get_train_data().fillna(0)
-    list_of_dicts = copy.deepcopy(train_data_as_df.T.to_dict().values())
+    data_as_df = datasupply.get_data_all().fillna(0)
+    list_of_dicts = copy.deepcopy(data_as_df.T.to_dict().values())
     #print 'train data excerpt: ',list_of_dicts
     #print 'end of data'
     return list_of_dicts
