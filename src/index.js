@@ -4,6 +4,7 @@ import BoxPlot from 'candela/plugins/vega/BoxPlot';
 import { select,
          selectAll } from 'd3-selection';
 import { json } from 'd3-request';
+import { csv } from 'd3-request';
 import dl from 'datalib';
 import Remarkable from 'remarkable';
 
@@ -25,6 +26,9 @@ import models from './tangelo/models.yml';
 
 import stoppingTemplate from './template/stopping.jade';
 import stopProcess from './util/stopProcess';
+
+// adding CSV parsing for returned pipeline data
+//var d3Dsv = require("d3-dsv")
 
 // KLUDGE - evil mount of a function, so it is visible from a call
 // in the Pug template (a quit button on the GUI)
@@ -50,6 +54,11 @@ json('/config', cfg => {
     //console.log('ajax return:',data_contents)
     store.dispatch(action.setActiveData(data_contents));
     store.dispatch(action.setDataSchema(cfg['dataset_schema']));
+  });
+
+  // now that we have the config information, look up the datasets
+  json('/dataset/metadata', (error,metadata_contents) => {
+    store.dispatch(action.setVariableMetadata(metadata_contents));
   });
 
   // now that we have the config information, store the problems to be solved
@@ -495,6 +504,7 @@ observeStore(next => {
   // TODO: It would have been better to pass in the inputVars, but I wasn't sure how to get
   // them automatically updated, so just pull them from the store below.
 
+
   const yVar = get('yVar');
   const immData = next.getIn(['data', 'data']);
 
@@ -511,7 +521,7 @@ observeStore(next => {
     data: data.map(datum => datum[name])
   }));
 
-  // If the modeling variable is filled display a row of scatterplots
+  // If the modeling variable is filled display a row of scatterplots.  
   if (yVar) {
 
     // clear out the previous display
@@ -584,9 +594,16 @@ observeStore(next => {
 
 }, s => s.get('exploratoryVisMatrix'));
 
+
+
 // This should really be triggered by the model being run --
 // not a user clicking a button
-select('button#run-post-vis').on('click', () => {
+// select('button#run-post-vis').on('click', () => {
+
+// now it has been made into a function
+function viewPredictedResults(predicted) {
+
+
   const immData = store.getState().getIn(['data', 'data']);
 
   if (!immData) {
@@ -596,193 +613,221 @@ select('button#run-post-vis').on('click', () => {
   const data = immData.toJS();
   const names = Object.keys(data[0]);
 
+  // find the problem target 
+  // hard coded to regression for now, but in other problem types, 
+  // this could be a categorical variable 
+  const target = store.getState().getIn(['problem', 'targets', 0]).toJS()['colName'];
+  console.log('target is:',target)
+
+  // how do we handle the d3mIndex so datasets don't get scrambled?  the indices are gone here
+  console.log('data row:',data[5])
+  console.log('predicted row', predicted[5])
+
+  // build the predVar sructure by extracting the predicted target values out of the TA2 return
+  var predictedValue = []
+  for (var i = predicted.data.length - 1; i >= 0; i--) {
+    predictedValue[i] = predicted.data[i][target]
+  }
+
+  // build a variable for charting. Cast the type of the variable according to the 
+  // data schema if needed
+
+  const predVar = {
+    name: "predicted",
+    data: enforcePredictedDataSchema(predictedValue,target)
+  };
+
   // need to sort the data on the target so the lines that we draw will be connecting
   // points in the right order - note that target is hard-coded as "Hits" for now
   function compare(a,b) {
-    if (a.Hits < b.Hits)
+    if (a.target < b.target)
       return -1;
-    if (a.Hits > b.Hits)
+    if (a.target > b.target)
       return 1;
     return 0;
   }
-  data.sort(compare);
+  //data.sort(compare);
 
   // Gather up the features as separate entries in a vars list
   const vars = names.map(name => ({
     name,
     data: data.map(datum => datum[name])
   }));
-
-  const yVar = vars[0]; // hard coded to "hits" for now but this should be the target variable
-  // (I would grab it from the problem target but for the baseball data it's categorical)
-  // const target = store.getState().getIn(['problem', 'targets', 0]);
+ 
 
   // also hard-coding a prediction and residual variable, but this should come from ta2
-  const predVar = {
-    name: "predicted",
-    data: data.map(d => d.At_bats / 4)
-  };
+  // const predVar = {
+  //   name: "predicted",
+  //   data: data.map(d => d.At_bats / 4)
+  // };
+  var residuals = []
+  for (var i = 0; i < predVar.data.length; i++) {
+    residuals.push(data[i][target]-predVar.data[i])
+  }
+
   const residVar = {
     name: "residuals",
-    data: data.map(d => d.Hits - d.At_bats / 4)
+    data: residuals
   };
 
-  // If the modeling variable is filled display a row of scatterplots
-  if (yVar) {
+  // clear out the previous display
+  const elmatrix = select('#scatterplotmatrix2');
+  elmatrix.selectAll('*')
+    .remove();
 
-    // clear out the previous display
-    const elmatrix = select('#scatterplotmatrix2');
-    elmatrix.selectAll('*')
-      .remove();
+  // *** I don't know whatis supposed to be yVar.data  ??
+  // const data = yVar.data.map((d, i) => ({
+  //   Predicted: predVar.data[i],
+  //   Residuals: residVar.data[i]
+  // }));
+  const plotdata = []
+  for (var i = 0; i< data.length; i++) {
+    plotdata.push({Predicted: predVar.data[i], Residuals: residVar.data[i]})
+  }
 
-    const data = yVar.data.map((d, i) => ({
-      Predicted: predVar.data[i],
-      Residuals: residVar.data[i]
-    }));
+  // const pspec = {
+  //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  //   "data": { "values" : data },
+  //   "mark": "circle",
+  //   "encoding": {
+  //     "x": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
+  //     "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
+  //   }
+  // }
 
-    const pspec = {
-      "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-      "data": { "values" : data },
-      "mark": "circle",
-      "encoding": {
-        "x": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
-        "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
-      }
-    }
+  jQuery('<h5/>', {
+    text: "Residuals vs. Predicted",
+    }).appendTo('#scatterplotmatrix2');
+  jQuery('<div/>', {
+    id: "ta2-pred-resid",
+    }).appendTo('#scatterplotmatrix2');
 
-    jQuery('<h5/>', {
-      text: "Residuals vs. Predicted",
-      }).appendTo('#scatterplotmatrix2');
-    jQuery('<div/>', {
-      id: "ta2-pred-resid",
-      }).appendTo('#scatterplotmatrix2');
+  // create a new plot for this variable combination
 
-    // create a new plot for this variable combination
-
-    var plotElement = document.getElementById("ta2-pred-resid");
-    const vismatrix0 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-      data,
-      x: "Predicted",
-      y: "Residuals",
-      xScale: { "zero": false },
-      yScale: { "zero": false },
-      width: 400 * plotSizeScale,
-      height: 400 * plotSizeScale
-    });
-    vismatrix0.render();
+  var plotElement = document.getElementById("ta2-pred-resid");
+  const vismatrix0 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+    plotdata,
+    x: "Predicted",
+    y: "Residuals",
+    xScale: { "zero": false },
+    yScale: { "zero": false },
+    width: 400 * plotSizeScale,
+    height: 400 * plotSizeScale
+  });
+  vismatrix0.render();
 
 
-    // loop through the features and draw a plot for each feature compared to the modeling feature
-    for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
+  // loop through the features and draw a plot for each feature compared to the modeling feature
+  for (var featureIndex=0; featureIndex<vars.length; featureIndex++) {
 
-      // ignore the case where the modeling feature is plotted against itself
-      // also ignore cases where the Y feature is non-numeric by testing using a heuristic
-      // and where the feature is an internal d3mIndex added to all datasets, this would confuse
-      // a problem-oriented user
+    // ignore the case where the modeling feature is plotted against itself
+    // also ignore cases where the Y feature is non-numeric by testing using a heuristic
+    // and where the feature is an internal d3mIndex added to all datasets, this would confuse
+    // a problem-oriented user
 
-      if ((vars[featureIndex].name != yVar.name) &&
-          (vars[featureIndex].name != 'd3mIndex') &&
-          (determineVariableType(vars[featureIndex].data).type=='number')) {
+    if ((vars[featureIndex].name != target) &&
+        (vars[featureIndex].name != 'd3mIndex') &&
+        (determineVariableType(vars[featureIndex].data).type=='number')) {
 
-        // fill the yVar object
-        const data = yVar.data.map((d, i) => ({
-          [yVar.name]: yVar.data[i],
-          [vars[featureIndex].name]: vars[featureIndex].data[i],
-          Predicted: predVar.data[i],
-          Residuals: residVar.data[i],
-          name: d
-        }));
+      // **** changed yVar.data to yVar
+      // fill the yVar object
+      const data = yVar.data.map((d, i) => ({
+        [yVar.name]: yVar.data[i],
+        [vars[featureIndex].name]: vars[featureIndex].data[i],
+        Predicted: predVar.data[i],
+        Residuals: residVar.data[i],
+        name: d
+      }));
 
-        // // use vega-lite instead of candela because we need more flexibility
-        // // (need scales to not always include zero)
-        // const pspec = {
-        //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-        //   "data": { "values" : data },
-        //   "layer": [{
-        //     "mark": "point",
-        //     "encoding": {
-        //       "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-        //       "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
-        //     }
-        //   }
-        //   // , {
-        //   //   "mark": "line",
-        //   //   "encoding": {
-        //   //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-        //   //     "y": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
-        //   //     "color": {"value": "black"}
-        //   //   }
-        //   // }
-        //   ]
-        // }
+      // // use vega-lite instead of candela because we need more flexibility
+      // // (need scales to not always include zero)
+      // const pspec = {
+      //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+      //   "data": { "values" : data },
+      //   "layer": [{
+      //     "mark": "point",
+      //     "encoding": {
+      //       "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+      //       "y": {"field": yVar.name, "type": "quantitative", "scale": {"zero": false}}
+      //     }
+      //   }
+      //   // , {
+      //   //   "mark": "line",
+      //   //   "encoding": {
+      //   //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+      //   //     "y": {"field": "Predicted", "type": "quantitative", "scale": {"zero": false}},
+      //   //     "color": {"value": "black"}
+      //   //   }
+      //   // }
+      //   ]
+      // }
 
-        // const pspec2 = {
-        //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-        //   "data": { "values" : data },
-        //   "mark": "circle",
-        //   "encoding": {
-        //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
-        //     "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
-        //   }
-        // }
+      // const pspec2 = {
+      //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+      //   "data": { "values" : data },
+      //   "mark": "circle",
+      //   "encoding": {
+      //     "x": {"field": vars[featureIndex].name, "type": "quantitative", "scale": {"zero": false}},
+      //     "y": {"field": "Residuals", "type": "quantitative", "scale": {"zero": false}}
+      //   }
+      // }
 
-        // add a new Div inside the #scatterplotmatrix element
-        jQuery('<h5/>', {
-          text: vars[featureIndex].name,
-          css: { "clear": "both" },
-          }).appendTo('#scatterplotmatrix2');
-        jQuery('<div/>', {
-          id: vars[featureIndex].name + "-ta2-cont",
-          }).appendTo('#scatterplotmatrix2');
-        jQuery('<div/>', {
-          id: vars[featureIndex].name + "-ta2-pred",
-          css: { "float": "left" },
-          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
-        jQuery('<div/>', {
-          id: vars[featureIndex].name + "-ta2-resid",
-          css: { "float": "left" },
-          }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+      // add a new Div inside the #scatterplotmatrix element
+      jQuery('<h5/>', {
+        text: vars[featureIndex].name,
+        css: { "clear": "both" },
+        }).appendTo('#scatterplotmatrix2');
+      jQuery('<div/>', {
+        id: vars[featureIndex].name + "-ta2-cont",
+        }).appendTo('#scatterplotmatrix2');
+      jQuery('<div/>', {
+        id: vars[featureIndex].name + "-ta2-pred",
+        css: { "float": "left" },
+        }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
+      jQuery('<div/>', {
+        id: vars[featureIndex].name + "-ta2-resid",
+        css: { "float": "left" },
+        }).appendTo("#" + vars[featureIndex].name + "-ta2-cont");
 
-        // create a new plot for this variable combination
-        // vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
-        //   {
-        //     "actions": false,
-        //     "height": 400*plotSizeScale / 3,
-        //     "width": 400*plotSizeScale / 3
-        //   });
-        // vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
-        //   {
-        //     "actions": false,
-        //     "height": 400*plotSizeScale / 3,
-        //     "width": 400*plotSizeScale / 3
-        //   });
-        var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-pred")
-        const vismatrix1 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-          data,
-          x: vars[featureIndex].name,
-          y: yVar.name,
-          xScale: { "zero": false },
-          yScale: { "zero": false },
-          width: 500 * plotSizeScale / 1.5,
-          height: 500 * plotSizeScale / 1.5
-        });
-        vismatrix1.render();
+      // create a new plot for this variable combination
+      // vegaEmbed("#" + vars[featureIndex].name + "-ta2-pred", pspec,
+      //   {
+      //     "actions": false,
+      //     "height": 400*plotSizeScale / 3,
+      //     "width": 400*plotSizeScale / 3
+      //   });
+      // vegaEmbed("#" + vars[featureIndex].name + "-ta2-resid", pspec2,
+      //   {
+      //     "actions": false,
+      //     "height": 400*plotSizeScale / 3,
+      //     "width": 400*plotSizeScale / 3
+      //   });
+      var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-pred")
+      const vismatrix1 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        data,
+        x: vars[featureIndex].name,
+        y: yVar.name,
+        xScale: { "zero": false },
+        yScale: { "zero": false },
+        width: 500 * plotSizeScale / 1.5,
+        height: 500 * plotSizeScale / 1.5
+      });
+      vismatrix1.render();
 
-        var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-resid")
-        const vismatrix2 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-          data,
-          x: vars[featureIndex].name,
-          y: "Residuals",
-          xScale: { "zero": false },
-          yScale: { "zero": false },
-          width: 500 * plotSizeScale / 1.5,
-          height: 500 * plotSizeScale / 1.5
-        });
-        vismatrix2.render();
-      }
+      var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-resid")
+      const vismatrix2 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+        data,
+        x: vars[featureIndex].name,
+        y: "Residuals",
+        xScale: { "zero": false },
+        yScale: { "zero": false },
+        width: 500 * plotSizeScale / 1.5,
+        height: 500 * plotSizeScale / 1.5
+      });
+      vismatrix2.render();
     }
   }
-});
+}
 
 
 // When the model changes, update the input variables.
@@ -915,6 +960,27 @@ observeStore((next, last) => {
 }, s => s.getIn(['modeling', 'inputVars']));
 
 
+// check the known schema for the variables and adjust strings into numbers if needed
+function enforcePredictedDataSchema(data,columnName) {
+  // get the dataset schema and adjust the contents of the passed dataset if needed
+  const schema = store.getState().getIn(['metadata']).toJS()
+      .filter(x => x.colName === columnName)
+  var outdata = []
+  for (var i = 0; i < data.length ;  i++) {
+    switch(schema[0].colType) {
+      case "real":
+        outdata.push(parseFloat(data[i]))
+        break;
+      case "integer":
+        outdata.push(parseInt(data[i]))
+        break;
+      default:
+        ;
+      }
+    }
+    return outdata
+}
+
 
 // when the user selects the TA2s to connect to for computation, then create a session and initiate
 
@@ -968,37 +1034,29 @@ observeStore(next => {
           // then add the accessible directory and read the file
           const filename = pipeline.resultUri.substring(pipeline.resultUri.lastIndexOf('/')+1);
           const accessibleLocation = 'pipelines/'+filename
-          $.ajax({
-            url: accessibleLocation,
-            dataType: 'text',
-            success: function (predictedData) {
-              // store the returned results in the store in a pipeline results section   
-              console.log(predictedData)
-            }
-          });
-         
-          // read the data and put it in the store
-          const resultUri = pipeline.resultUri
-          const params = {
-           resultUri
-          };
-
-          let query = [];
-          for (let x in params) {
-           if (params.hasOwnProperty(x)) {
-             query.push(`${x}=${params[x]}`);
-           }
-          }
-          // read the data in a tangelo service and add it to the store, organized by the pipeline
-          const url = `/ta2read?${query.join('&')}`;
-          json(url).post({}, predictedData => {
-           console.log(predictedData)
-           store.dispatch(action.addExecutedPipelineData(pipeline.pipelineId,predictedData));
+          
+          // read the CSV data into an object and store it in the store
+          csv(accessibleLocation, function(predictedData) {
+            console.log(predictedData[0]);
+            store.dispatch(action.addExecutedPipelineData(pipeline.pipelineId, predictedData));
+            panels.select('.executed_status')
+                .html(d => 'The pipeline is ready to view results');
           });
 
         });
       });
     });
+
+  // the user selected to view the executed pipeline's results.  Fill the review plots
+  panels.select('.view_predicted')
+    .on('click', d => {
+      // only return results for the currently selected pipeline
+      const data = store.getState().getIn(['ta2','executedData'])
+        .toJS()
+        .filter(f => f.id === d.id)
+      viewPredictedResults(data[0])
+    });
+
 
   panels.select('.export')
     .on('click', d => {

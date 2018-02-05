@@ -13,6 +13,8 @@ def run(op,*args,**kwargs):
         return getDataset()
     elif op == 'listfeatures':
         return listDatasetFeatures()
+    elif op == 'metadata':
+        return listFeatureMetadata()
     elif op == 'problems':
         return getProblems()
     else:
@@ -40,6 +42,11 @@ def listDatasetFeatures():
         featurelist.append(feat)
     return featurelist
 
+
+def listFeatureMetadata():       
+    dataset_schema_path = os.environ.get('TRAINING_DATA_ROOT')
+    datasupply = d3mds.D3MDataset(dataset_schema_path)
+    return datasupply.get_learning_data_columns()
 
 
 def getProblems():

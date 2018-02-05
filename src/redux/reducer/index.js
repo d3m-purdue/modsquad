@@ -23,6 +23,7 @@ const initial = Immutable.fromJS({
     targets: []
   },
   vars: [],
+  metadata: [],
   logVars: [],
   exploratoryVis: {
     xVar: null,
@@ -99,6 +100,11 @@ const reducer = (state = initial, action = {}) => {
     case actionType.setVariables:
       newState = state.set('vars', Immutable.fromJS(action.variables));
       break;
+
+    case actionType.setVariableMetadata:
+      newState = state.set('metadata', Immutable.fromJS(action.metadata));
+      break;
+
 
     case actionType.createLogVariable:
       newState = state.update('logVars', vars => vars.push(Immutable.fromJS({

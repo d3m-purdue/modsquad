@@ -9,9 +9,11 @@
           .col-md-12
             h4 Score
             span #[span.strong.score-type]: #[span.score]
+            div #[.executed_status]
         .row
           .col-md-12
             h4 Execute
             .btn-toolbar
-              button.btn.btn-default.predict Predict
-              button.btn.btn-success.export Export
+              button.btn.btn-default.predict Execute Prediction
+              button.btn.btn-default.view_predicted View Results
+              button.btn.btn-success.export Export Pipeline

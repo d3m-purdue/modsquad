@@ -25,6 +25,9 @@ setDataSchema:
 setVariables:
   - variables
 
+setVariableMetadata:
+  - metadata
+
 createLogVariable:
   - name
   - data
