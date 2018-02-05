@@ -538,8 +538,9 @@ observeStore(next => {
       // a problem-oriented user
 
       if ((vars[featureIndex].name != yVar.name) &&
-          (vars[featureIndex].name != 'd3mIndex') &&
-	        (determineVariableType(vars[featureIndex].data).type=='number')) {
+          (vars[featureIndex].name != 'd3mIndex')
+	        // && (determineVariableType(vars[featureIndex].data).type=='number')
+          ) {
 
         console.log('yVar:',yVar[10])
 
@@ -581,15 +582,35 @@ observeStore(next => {
 
         var plotElement = document.getElementById(vars[featureIndex].name)
 
-        const vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-          data,
-          x: vars[featureIndex].name,
-          y: yVar.name,
-          xScale: { "zero": false },
-          yScale: { "zero": false },
-          width: 300 * plotSizeScale,
-          height: 300 * plotSizeScale
-        });
+        // find the type of the X variable and do either a box plot or a scatterplot accordingly
+        var xVar_metadata = store.getState().getIn(['metadata']).toJS()
+                                 .filter(f => (f.colName === vars[featureIndex].name));
+        var xVar_type = xVar_metadata[0]['colType']
+        //console.log('var and type:',vars[featureIndex].name,xVar_type)
+
+        switch (xVar_type) {
+          case 'categorical':
+             var vismatrix = new BoxPlot(plotElement, { // eslint-disable-line no-unused-vars
+              data,
+              x: vars[featureIndex].name,
+              y: yVar.name,
+              xScale: { "zero": false },
+              yScale: { "zero": false },
+              width: 300 * plotSizeScale,
+              height: 300 * plotSizeScale
+            });         
+          default:
+            vismatrix = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
+              data,
+              x: vars[featureIndex].name,
+              y: yVar.name,
+              xScale: { "zero": false },
+              yScale: { "zero": false },
+              width: 300 * plotSizeScale,
+              height: 300 * plotSizeScale
+            });
+          break;
+        }
         vismatrix.render();
       }
     }
@@ -624,7 +645,7 @@ function viewPredictedResults(predicted) {
   //console.log('data row:',data[5])
   //console.log('predicted row', predicted)
     console.log('do we need to handle ordering by d3mindex here?')
-    
+
   // build the predVar sructure by extracting the predicted target values out of the TA2 return
   var predictedValue = []
   for (var i = predicted.data.length - 1; i >= 0; i--) {
@@ -681,7 +702,7 @@ function viewPredictedResults(predicted) {
     Predicted: predVar.data[i],
     Residuals: residVar.data[i]
   }));
-  console.log('pred vs. resid:',plotdata[10])
+  //console.log('pred vs. resid:',plotdata.slice(0,10))
 
 
   // const pspec = {
@@ -705,7 +726,7 @@ function viewPredictedResults(predicted) {
 
   var plotElement = document.getElementById("ta2-pred-resid");
   const vismatrix0 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-    plotdata,
+    data: plotdata,
     x: "Predicted",
     y: "Residuals",
     xScale: { "zero": false },
@@ -734,14 +755,14 @@ function viewPredictedResults(predicted) {
         [vars[featureIndex].name]: vars[featureIndex].data[i],
         name: d
       }));
-      console.log('preddata:',preddata[10])
+      //console.log('preddata:',preddata.slice(0,5))
 
       const residdata = residVar.data.map((d, i) => ({
         [residVar.name]: residVar.data[i],
         [vars[featureIndex].name]: vars[featureIndex].data[i],
         name: d
       }));
-        console.log('residdata:',residdata[10])
+        //console.log('residdata:',residdata.slice(0,5))
 
       // // use vega-lite instead of candela because we need more flexibility
       // // (need scales to not always include zero)
@@ -808,7 +829,7 @@ function viewPredictedResults(predicted) {
       //   });
       var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-pred")
       const vismatrix1 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        preddata,
+        data: preddata,
         x: vars[featureIndex].name,
         y: predVar.name,
         xScale: { "zero": false },
@@ -820,7 +841,7 @@ function viewPredictedResults(predicted) {
 
       var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-resid")
       const vismatrix2 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        residdata,
+        data: residdata,
         x: vars[featureIndex].name,
         y: "Residuals",
         xScale: { "zero": false },
@@ -979,7 +1000,8 @@ function enforcePredictedDataSchema(data,columnName) {
         outdata.push(parseInt(data[i]))
         break;
       default:
-        ;
+        // push the data through unchanged
+        outdata.push(data[i])
       }
     }
     return outdata
