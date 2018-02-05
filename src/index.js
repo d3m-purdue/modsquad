@@ -541,12 +541,15 @@ observeStore(next => {
           (vars[featureIndex].name != 'd3mIndex') &&
 	        (determineVariableType(vars[featureIndex].data).type=='number')) {
 
+        console.log('yVar:',yVar[10])
+
         // fill the yVar object
         const data = yVar.data.map((d, i) => ({
           [yVar.name]: yVar.data[i],
           [vars[featureIndex].name]: vars[featureIndex].data[i],
           name: d
         }));
+        console.log('data after map:',data[10])
 
         // use vega-lite instead of candela because we need more flexibility
         // (need scales to not always include zero)
@@ -584,8 +587,8 @@ observeStore(next => {
           y: yVar.name,
           xScale: { "zero": false },
           yScale: { "zero": false },
-          width: 600 * plotSizeScale,
-          height: 600 * plotSizeScale
+          width: 300 * plotSizeScale,
+          height: 300 * plotSizeScale
         });
         vismatrix.render();
       }
@@ -596,13 +599,11 @@ observeStore(next => {
 
 
 
-// This should really be triggered by the model being run --
-// not a user clicking a button
-// select('button#run-post-vis').on('click', () => {
+// This routine is called when the user elects to view the output of a 
+// pipeline run.  The data is converted to numerical according to the dataset schema
+// and plots of the predicted results and residuals are generated for each dataset variable
 
-// now it has been made into a function
 function viewPredictedResults(predicted) {
-
 
   const immData = store.getState().getIn(['data', 'data']);
 
@@ -620,9 +621,10 @@ function viewPredictedResults(predicted) {
   console.log('target is:',target)
 
   // how do we handle the d3mIndex so datasets don't get scrambled?  the indices are gone here
-  console.log('data row:',data[5])
-  console.log('predicted row', predicted[5])
-
+  //console.log('data row:',data[5])
+  //console.log('predicted row', predicted)
+    console.log('do we need to handle ordering by d3mindex here?')
+    
   // build the predVar sructure by extracting the predicted target values out of the TA2 return
   var predictedValue = []
   for (var i = predicted.data.length - 1; i >= 0; i--) {
@@ -633,7 +635,7 @@ function viewPredictedResults(predicted) {
   // data schema if needed
 
   const predVar = {
-    name: "predicted",
+    name: "Predicted",
     data: enforcePredictedDataSchema(predictedValue,target)
   };
 
@@ -666,7 +668,7 @@ function viewPredictedResults(predicted) {
   }
 
   const residVar = {
-    name: "residuals",
+    name: "Residuals",
     data: residuals
   };
 
@@ -675,15 +677,12 @@ function viewPredictedResults(predicted) {
   elmatrix.selectAll('*')
     .remove();
 
-  // *** I don't know whatis supposed to be yVar.data  ??
-  // const data = yVar.data.map((d, i) => ({
-  //   Predicted: predVar.data[i],
-  //   Residuals: residVar.data[i]
-  // }));
-  const plotdata = []
-  for (var i = 0; i< data.length; i++) {
-    plotdata.push({Predicted: predVar.data[i], Residuals: residVar.data[i]})
-  }
+  const plotdata = predVar.data.map((d, i) => ({
+    Predicted: predVar.data[i],
+    Residuals: residVar.data[i]
+  }));
+  console.log('pred vs. resid:',plotdata[10])
+
 
   // const pspec = {
   //   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
@@ -711,8 +710,8 @@ function viewPredictedResults(predicted) {
     y: "Residuals",
     xScale: { "zero": false },
     yScale: { "zero": false },
-    width: 400 * plotSizeScale,
-    height: 400 * plotSizeScale
+    width: 200 * plotSizeScale,
+    height: 200 * plotSizeScale
   });
   vismatrix0.render();
 
@@ -729,15 +728,20 @@ function viewPredictedResults(predicted) {
         (vars[featureIndex].name != 'd3mIndex') &&
         (determineVariableType(vars[featureIndex].data).type=='number')) {
 
-      // **** changed yVar.data to yVar
-      // fill the yVar object
-      const data = yVar.data.map((d, i) => ({
-        [yVar.name]: yVar.data[i],
+
+      const preddata = predVar.data.map((d, i) => ({
+        [predVar.name]: predVar.data[i],
         [vars[featureIndex].name]: vars[featureIndex].data[i],
-        Predicted: predVar.data[i],
-        Residuals: residVar.data[i],
         name: d
       }));
+      console.log('preddata:',preddata[10])
+
+      const residdata = residVar.data.map((d, i) => ({
+        [residVar.name]: residVar.data[i],
+        [vars[featureIndex].name]: vars[featureIndex].data[i],
+        name: d
+      }));
+        console.log('residdata:',residdata[10])
 
       // // use vega-lite instead of candela because we need more flexibility
       // // (need scales to not always include zero)
@@ -804,25 +808,25 @@ function viewPredictedResults(predicted) {
       //   });
       var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-pred")
       const vismatrix1 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        data,
+        preddata,
         x: vars[featureIndex].name,
-        y: yVar.name,
+        y: predVar.name,
         xScale: { "zero": false },
         yScale: { "zero": false },
-        width: 500 * plotSizeScale / 1.5,
-        height: 500 * plotSizeScale / 1.5
+        width: 300 * plotSizeScale / 1.5,
+        height: 300 * plotSizeScale / 1.5
       });
       vismatrix1.render();
 
       var plotElement = document.getElementById(vars[featureIndex].name + "-ta2-resid")
       const vismatrix2 = new ScatterPlot(plotElement, { // eslint-disable-line no-unused-vars
-        data,
+        residdata,
         x: vars[featureIndex].name,
         y: "Residuals",
         xScale: { "zero": false },
         yScale: { "zero": false },
-        width: 500 * plotSizeScale / 1.5,
-        height: 500 * plotSizeScale / 1.5
+        width: 300 * plotSizeScale / 1.5,
+        height: 300 * plotSizeScale / 1.5
       });
       vismatrix2.render();
     }
