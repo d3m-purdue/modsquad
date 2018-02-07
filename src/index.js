@@ -159,6 +159,8 @@ select('button.train').on('click', () => {
   const data_uri = store.getState().getIn(['data', 'schema']);
 
   const target_features = store.getState().getIn(['problem', 'targets']).toJS();
+  const task_type = store.getState().getIn(['problem', 'tasktype']);
+  const task_subtype = store.getState().getIn(['problem', 'tasksubtype']);
   // predict_features is currently ignored.  Later user will be able to select features to use
   // during prediction
   const predict_features = [];
@@ -171,8 +173,8 @@ select('button.train').on('click', () => {
   const params = {
     context,
     data_uri,
-    //task_type,
-    //task_subtype,
+    task_type,
+    task_subtype,
     metrics,
     target_features,
     predict_features,
@@ -329,7 +331,7 @@ observeStore(next => {
      const vis = new HistogramPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 500*plotSizeScale,
+        width: 400*plotSizeScale,
         height: 300*plotSizeScale
       });
       vis.render();
@@ -338,7 +340,7 @@ observeStore(next => {
       const vis2= new NormalPlot(this, { // eslint-disable-line no-unused-vars
         data: d.data,
         opacity: 0.9,
-        width: 500*plotSizeScale,
+        width: 400*plotSizeScale,
         height: 300*plotSizeScale
       });
       vis2.render();
@@ -539,7 +541,7 @@ observeStore(next => {
 
       if ((vars[featureIndex].name != yVar.name) &&
           (vars[featureIndex].name != 'd3mIndex')
-	        // && (determineVariableType(vars[featureIndex].data).type=='number')
+	         && (determineVariableType(vars[featureIndex].data).type=='number')
           ) {
 
         console.log('yVar:',yVar[10])
@@ -715,6 +717,11 @@ function viewPredictedResults(predicted) {
   //   }
   // }
 
+  const targetHeader = "Target feature: "+ target
+
+  jQuery('<h5/>', {
+    text: targetHeader,
+    }).appendTo('#scatterplotmatrix2');
   jQuery('<h5/>', {
     text: "Residuals vs. Predicted",
     }).appendTo('#scatterplotmatrix2');

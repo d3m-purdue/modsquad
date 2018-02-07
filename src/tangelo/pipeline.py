@@ -49,6 +49,28 @@ def get_stub():
   stub = core_pb2_grpc.CoreStub(channel)
   return stub
 
+def taskTypeLookup(task):
+  if (task=='classification'):
+    print 'detected classification task'
+    return core_pb2.CLASSIFICATION
+  elif (task == 'clustering'):
+    print 'detected clustering task'
+    return core_pb2.CLUSTERING
+  else:
+    print 'assuming regression'
+    return core_pb2.REGRESSION
+
+def subTaskLookup(sub):
+  if (sub == 'multiClass'):
+    print 'multiClass subtype'
+    return core_pb2.MULTICLASS
+  if (sub == 'multivariate'):
+    return core_pb2.MULTIVARIATE
+  if (sub == 'univariate'):
+    return core_pb2.UNIVARIATE
+  else:
+    print 'assuming NONE subtask'
+    return core_pb2.NONE
 
 
 def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=None, target_features=None, predict_features=[],metrics=None,max_pipelines=10):
@@ -66,9 +88,9 @@ def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=Non
     features.append(tf)
 
   # we are having trouble parsing the problem specs into valid API specs, so just hardcode
-  # to this problem type for now.  We could fix this with a lookup table to return valid API codes
-  task = core_pb2.REGRESSION
-  tasksubtype = core_pb2.UNIVARIATE
+  # to certain problem types for now.  We could fix this with a more general lookup table to return valid API codes
+  task = taskTypeLookup(task_type)
+  tasksubtype = subTaskLookup(task_subtype)
 
   # the metrics in the files are imprecise text versions of the enumerations, so just standardize.  A lookup table
   # would help here, too

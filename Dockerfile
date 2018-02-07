@@ -24,6 +24,9 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash - \
 RUN mkdir /d3m-ta3
 COPY . /d3m-ta3
 
+# make a directory to copy TA2 results to for reading & analysis
+RUN mkdir /d3m-ta3/pipelines
+
 WORKDIR /d3m-ta3
 
 # install for stop command in base interpreter
