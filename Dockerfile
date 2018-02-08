@@ -24,9 +24,6 @@ RUN curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash - \
 RUN mkdir /d3m-ta3
 COPY . /d3m-ta3
 
-# make a directory to copy TA2 results to for reading & analysis
-RUN mkdir /d3m-ta3/pipelines
-
 WORKDIR /d3m-ta3
 
 # install for stop command in base interpreter
@@ -37,6 +34,11 @@ RUN npm install
 RUN npm run pythonprep
 RUN npm run protobuf
 RUN npm run build
+
+# make a directory to copy TA2 results to for reading & analysis. This
+# has to be after the run build, so the build directory exists
+
+RUN if [ ! -d "/d3m-ta3/build/pipelines" ]; then mkdir /d3m-ta3/build/pipelines; fi
 
 RUN useradd tangelo
 

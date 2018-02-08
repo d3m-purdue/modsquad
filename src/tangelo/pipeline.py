@@ -94,7 +94,7 @@ def createPipeline(context=None, data_uri=None, task_type=None, task_subtype=Non
 
   # the metrics in the files are imprecise text versions of the enumerations, so just standardize.  A lookup table
   # would help here, too
-  metrics=[core_pb2.ROC_AUC]
+  metrics=[core_pb2.F1_MICRO, core_pb2.ROC_AUC, core_pb2.ROOT_MEAN_SQUARED_ERROR, core_pb2.F1, core_pb2.R_SQUARED]
 
   context_in = cpb.SessionContext(session_id=context)
 
